@@ -14,15 +14,18 @@ namespace Engine {
         }
     };
 
-    SwapChain::SwapChain(mainProgram** mainProgramPtr, VkSurfaceKHR* surfacePtr, VkPhysicalDevice* physicalDevicePtr, VkDevice* logicalDevicePtr, GLFWwindow** windowPtr)
+    SwapChain::SwapChain(mainProgram** mainProgramPtr)
     {
+        mainProg = mainProgramPtr;
+        physicalDevice = (*mainProg)->device->getPhysicalDevice();
+        logicalDevice = (*mainProg)->device->getLogicalDevice();
         // Query swap chain support from physical device
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(*physicalDevicePtr, surfacePtr);
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(*physicalDevice);
 
         // Swap chain details
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
         VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
-        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities, windowPtr);
+        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
 
         // How many images we would like to have in swap chain
         // + 1 is to prevent the waiting on the driver to complete internal oeprations before we can acquire another image to render to
@@ -34,7 +37,7 @@ namespace Engine {
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = *surfacePtr;
+        createInfo.surface = *(*mainProg)->surface->getSurface();
 
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
@@ -47,7 +50,7 @@ namespace Engine {
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
         // Handle swap chain images that will be used across multiple queue families
-        Device::QueueFamilyIndices indices = Device::findQueueFamilies(*physicalDevicePtr, surfacePtr);
+        Device::QueueFamilyIndices indices = (*mainProg)->device->findQueueFamilies(*physicalDevice);
         uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
         if (indices.graphicsFamily != indices.presentFamily) {
@@ -77,13 +80,13 @@ namespace Engine {
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
         // Create swap chain
-        if (vkCreateSwapchainKHR(*logicalDevicePtr, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+        if (vkCreateSwapchainKHR(*logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
             throw std::runtime_error("failed to create swap chain!");
         }
         // Query the final number of images and resize the container and retrieve handles
-        vkGetSwapchainImagesKHR(*logicalDevicePtr, swapChain, &imageCount, nullptr);
+        vkGetSwapchainImagesKHR(*logicalDevice, swapChain, &imageCount, nullptr);
         swapChainImages.resize(imageCount);
-        vkGetSwapchainImagesKHR(*logicalDevicePtr, swapChain, &imageCount, swapChainImages.data());
+        vkGetSwapchainImagesKHR(*logicalDevice, swapChain, &imageCount, swapChainImages.data());
 
         // Store them in global variables for future use
         swapChainImageFormat = surfaceFormat.format;
@@ -92,8 +95,9 @@ namespace Engine {
     SwapChain::~SwapChain()
     {
     }
-    SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR* surfacePtr)
+    SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device)
     {
+        VkSurfaceKHR* surfacePtr = (*mainProg)->surface->getSurface();
         SwapChainSupportDetails details;
         // Takes specified physicalDevice and surface to query the surface capabilities
         vkGetPhysicalDeviceSurfaceCapabilitiesKHR(device, *surfacePtr, &details.capabilities);
@@ -118,6 +122,10 @@ namespace Engine {
         }
         return details;
     }
+    VkSwapchainKHR* SwapChain::getSwapChain()
+    {
+        return &swapChain;
+    }
     std::vector<VkImage>* SwapChain::getSwapChainImages()
     {
         return &swapChainImages;
@@ -125,6 +133,10 @@ namespace Engine {
     VkFormat* SwapChain::getSwapChainImageFormat()
     {
         return &swapChainImageFormat;
+    }
+    VkExtent2D* SwapChain::getSwapChainExtent()
+    {
+        return &swapChainExtent;
     }
     VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
     {
@@ -152,14 +164,14 @@ namespace Engine {
             return VK_PRESENT_MODE_FIFO_KHR;
         }
     }
-    VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow** windowPtr)
+    VkExtent2D SwapChain::chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities)
     {
         if (capabilities.currentExtent.width != UINT32_MAX) {
             return capabilities.currentExtent;
         }
         else {
             int width, height;
-            glfwGetFramebufferSize(*windowPtr, &width, &height);
+            glfwGetFramebufferSize(*(*mainProg)->window->getWindow(), &width, &height);
 
             VkExtent2D actualExtent = {
                 static_cast<uint32_t>(width),
@@ -174,10 +186,10 @@ namespace Engine {
 
         // Iterates all swap chain images
         for (uint32_t i = 0; i < swapChainImages.size(); i++) {
-            swapChainImageViews[i] = createImageView(logicalDevice, swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
+            swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
         }
     }
-    VkImageView SwapChain::createImageView(VkDevice* logicalDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
+    VkImageView SwapChain::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
         // No viewInfo.components since VK_COMPONENT_SWIZZLE_IDENTITY is defined as 0
         VkImageViewCreateInfo viewInfo{};
         viewInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;

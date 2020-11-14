@@ -38,7 +38,7 @@ void Engine::Device::pickPhysicalDevice()
     // If the device is suitable for using, select it
     for (const auto& device : devices) {
         if (isDeviceSuitable(device)) {
-            *physicalDevice = device;
+            physicalDevice = device;
             maxMSAASamples = getMaxUsableSampleCount();
             msaaSamples = maxMSAASamples;
             break;
@@ -50,15 +50,16 @@ void Engine::Device::pickPhysicalDevice()
         throw std::runtime_error("Failed to find a suitable GPU!");
     }
 }
-Engine::Device::Device(mainProgram** mainProgramPtr, VkInstance* instancePtr, VkPhysicalDevice* physicalDevicePtr, VkSurfaceKHR* surfacePtr)
+Engine::Device::Device(mainProgram** mainProgramPtr)
 {
-    instance = instancePtr;
-    physicalDevice = physicalDevicePtr;
-    // This index is the physical device's queue index
-    std::cout << "init" << std::endl;
+    mainProg = mainProgramPtr;
+    instance = (*mainProg)->instance->getInstance();
+    surface = (*mainProg)->surface->getSurface();
+
 
     pickPhysicalDevice();
-    QueueFamilyIndices indices = findQueueFamilies(*physicalDevice, surfacePtr);
+    // This index is the physical device's queue index
+    QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
 
     // For presentation queue
     std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
@@ -98,15 +99,15 @@ Engine::Device::Device(mainProgram** mainProgramPtr, VkInstance* instancePtr, Vk
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
     // If validation layers are enabled, layers will be set
-    if (enableValidationLayers) {
-        createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-        createInfo.ppEnabledLayerNames = validationLayers.data();
+    if ((*mainProg)->debugger->enableValidationLayers) {
+        createInfo.enabledLayerCount = static_cast<uint32_t>((*mainProg)->debugger->validationLayers.size());
+        createInfo.ppEnabledLayerNames = (*mainProg)->debugger->validationLayers.data();
     }
     else {
         createInfo.enabledLayerCount = 0;
     }
     // Create device, if failed then throw an exception
-    if (vkCreateDevice(*physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS) {
+    if (vkCreateDevice(physicalDevice, &createInfo, nullptr, &logicalDevice) != VK_SUCCESS) {
         throw std::runtime_error("failed to create logical device!");
     }
     // Retrieve queue handles with vkGetDeviceQueue
@@ -133,13 +134,13 @@ bool Engine::Device::isDeviceSuitable(VkPhysicalDevice device)
     return true;
     */
     std::cout << "isDeviceSuitable" << std::endl;
-    QueueFamilyIndices indices = findQueueFamilies(device, surface);
+    QueueFamilyIndices indices = findQueueFamilies(device);
     bool extensionsSupported = checkDeviceExtensionSupport(device);
 
     // Verify swap chain is adequate (sufficient)
     bool swapChainAdequate = false;
     if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device, surface);
+        SwapChainSupportDetails swapChainSupport = (*mainProg)->swapchain->querySwapChainSupport(device);
         // If the swapChainSupport formats and presentModes are NOT empty, swapChainAdequate will be true
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
@@ -153,11 +154,11 @@ bool Engine::Device::isDeviceSuitable(VkPhysicalDevice device)
 VkSampleCountFlagBits Engine::Device::getMaxUsableSampleCount()
 {
     VkPhysicalDeviceProperties physicalDeviceProperties;
-    vkGetPhysicalDeviceProperties(*physicalDevice, &physicalDeviceProperties);
+    vkGetPhysicalDeviceProperties(physicalDevice, &physicalDeviceProperties);
 
     // Get max sample count
     VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-    if (enableValidationLayers)
+    if ((*mainProg)->debugger->enableValidationLayers)
         std::cout << "Max sample (MSAA): " << counts << std::endl;
     if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
     if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
@@ -169,7 +170,7 @@ VkSampleCountFlagBits Engine::Device::getMaxUsableSampleCount()
     return VK_SAMPLE_COUNT_1_BIT;
 }
 
-Engine::Device::QueueFamilyIndices Engine::Device::findQueueFamilies(VkPhysicalDevice device, VkSurfaceKHR* surface)
+Engine::Device::QueueFamilyIndices Engine::Device::findQueueFamilies(VkPhysicalDevice device)
 {
     Engine::Device::QueueFamilyIndices indices;
     uint32_t queueFamilyCount = 0;
@@ -226,7 +227,7 @@ VkSampleCountFlagBits* Engine::Device::getMSAASamples(bool isMax)
 
 VkPhysicalDevice* Engine::Device::getPhysicalDevice()
 {
-    return physicalDevice;
+    return &physicalDevice;
 }
 
 VkDevice* Engine::Device::getLogicalDevice()

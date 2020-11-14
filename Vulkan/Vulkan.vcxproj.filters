@@ -42,6 +42,15 @@
     <ClCompile Include="renderpass.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="descriptor_set.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="pipeline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="model.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="main.h">
@@ -68,10 +77,16 @@
     <ClInclude Include="swapchain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="globalVariables.h">
+    <ClInclude Include="renderpass.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="renderpass.h">
+    <ClInclude Include="descriptor_set.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="pipeline.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="model.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

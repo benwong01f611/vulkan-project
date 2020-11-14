@@ -5,19 +5,27 @@
 #include <iostream>
 #include <vector>
 #include "main.h"
-#include "globalVariables.h"
 
 //bool enableValidationLayers;
 //VkInstance instance;
 
 namespace Engine {
 	class mainProgram;
-	class Debug :public globalVar{
+	class Debug{
 	public:
-		Debug(mainProgram** mainProgramPtr, VkInstance* instancePtr);
+		Debug(mainProgram** mainProgramPtr);
 		~Debug();
 		static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
+		// If it is not in debug stage, disable the validation layers, else enable it
+		#ifdef NDEBUG
+				const bool enableValidationLayers = false;
+		#else
+				const bool enableValidationLayers = true;
+		#endif
 
+		const std::vector<const char*> validationLayers = {
+				"VK_LAYER_KHRONOS_validation"
+		};;
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE; // Vulkan debug messenger
 	private:
 		VkInstance* instance;

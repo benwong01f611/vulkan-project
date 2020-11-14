@@ -2,9 +2,9 @@
 #include "main.h"
 
 
-Engine::Debug::Debug(mainProgram** mainProgramPtr, VkInstance* instancePtr)
+Engine::Debug::Debug(mainProgram** mainProgramPtr)
 {
-    instance = instancePtr;
+    instance = (*mainProgramPtr)->instance->getInstance();
     // If validation layers are disabled then we don't need to set it up
     if (!enableValidationLayers) return;
     VkDebugUtilsMessengerCreateInfoEXT createInfo;

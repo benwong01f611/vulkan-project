@@ -9,6 +9,9 @@
 #include "surface.h"
 #include "swapchain.h"
 #include "device.h"
+#include "renderpass.h"
+#include "descriptor_set.h"
+#include "pipeline.h"
 
 namespace Engine {
 	class Window;
@@ -17,6 +20,10 @@ namespace Engine {
 	class Surface;
 	class Device;
 	class SwapChain;
+	class RenderPass;
+	class DescriptorSet;
+	class Pipeline; 
+	class Model;
 	class mainProgram {
 	public:
 		mainProgram(mainProgram** mainProgPtr);
@@ -27,11 +34,13 @@ namespace Engine {
 		Surface* surface;
 		Device* device;
 		SwapChain* swapchain;
-		GLFWwindow* glfwWindow;
-		VkInstance vkInstance;
+		RenderPass* renderPass;
+		DescriptorSet* descriptorSet;
+		Pipeline* pipeline;
+		/*VkInstance vkInstance;
 		VkPhysicalDevice physicalDevice;
 		VkDevice logicalDevice;
-		VkSurfaceKHR vkSurface;
+		VkSurfaceKHR vkSurface;*/
 		bool framebufferResized = false;
 		mainProgram** mainProgramPtr;
 	};

@@ -2,10 +2,10 @@
 #include "debug.h"
 
 namespace Engine {
-    Instance::Instance(mainProgram** mainProgramPtr, VkInstance* instancePtr) {
-        instance = instancePtr;
+    Instance::Instance(mainProgram** mainProgramPtr) {
+        
         // If validation layers are enabled but the requested validation layers are not available, throw an exception
-        if (enableValidationLayers && !checkValidationLayerSupport()) {
+        if ((*mainProg)->debugger->enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
@@ -54,9 +54,9 @@ namespace Engine {
 
         // If validation layers are enabled, instance create info will have the numbers of enabled layers
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-        if (enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>(validationLayers.size());
-            createInfo.ppEnabledLayerNames = validationLayers.data();
+        if ((*mainProg)->debugger->enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>((*mainProg)->debugger->validationLayers.size());
+            createInfo.ppEnabledLayerNames = (*mainProg)->debugger->validationLayers.data();
 
             Debug::populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -69,7 +69,7 @@ namespace Engine {
         }
 
         // Create the instance with the createInfo, nullptr should be a pointer to custom allocator callbacks, &instance is our instance that stores the handle to new object
-        if (vkCreateInstance(&createInfo, nullptr, instance) != VK_SUCCESS) { // Pretty strainght forward enough, I shouldn't be too dumb to misunderstand it
+        if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) { // Pretty strainght forward enough, I shouldn't be too dumb to misunderstand it
             throw std::runtime_error("failed to create instance!"); // Throw an exception when failed to create an instance
         }
     }
@@ -87,7 +87,7 @@ namespace Engine {
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if (enableValidationLayers) {
+        if ((*mainProg)->debugger->enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
@@ -105,7 +105,7 @@ namespace Engine {
         // Store all available layers to the vector availableLayers by enumerating
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
         // Check if all layers in validationLayers exist in availableLayers
-        for (const char* layerName : validationLayers) {
+        for (const char* layerName : (*mainProg)->debugger->validationLayers) {
             bool layerFound = false;
             // Loop through available layers, if the layer is found, break out the loop and search for the next layer
             for (const auto& layerProperties : availableLayers) {
@@ -120,5 +120,9 @@ namespace Engine {
         }
         // If all required layers are found, return true
         return true;
+    }
+    VkInstance* Instance::getInstance()
+    {
+        return &instance;
     }
 }

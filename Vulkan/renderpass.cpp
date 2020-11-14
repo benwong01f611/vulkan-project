@@ -142,6 +142,11 @@ VkFormat Engine::RenderPass::findSupportedFormat(const std::vector<VkFormat>& ca
     throw std::runtime_error("failed to find supported format!");
 }
 
+VkRenderPass Engine::RenderPass::getRenderPass()
+{
+    return renderPass;
+}
+
 Engine::mainProgram** Engine::RenderPass::getParent()
 {
     return mainProg;

@@ -8,14 +8,16 @@ namespace Engine {
 	class mainProgram;
 	class Window {
 		public:
-			Window(mainProgram** mainProgramPtr, GLFWwindow** windowPtr);
+			Window(mainProgram** mainProgramPtr);
 			~Window();
 
 			int windowWidth;
 			int windowHeight;
 
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
+			GLFWwindow** getWindow();
 		private:
-			GLFWwindow** window;
+			GLFWwindow* window;
+			mainProgram** mainProg;
 	};
 };

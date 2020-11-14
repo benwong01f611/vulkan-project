@@ -24,19 +24,19 @@ namespace Engine {
     
     class SwapChain {
     public:
-        SwapChain(mainProgram** mainProgramPtr, VkSurfaceKHR* surfacePtr, VkPhysicalDevice* physicalDevicePtr, VkDevice* logicalDevicePtr, GLFWwindow** windowPtr);
+        SwapChain(mainProgram** mainProgramPtr);
         ~SwapChain();
-        static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR* surfacePtr);
+        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
         VkSwapchainKHR* getSwapChain();
         std::vector<VkImage>* getSwapChainImages();
         VkFormat* getSwapChainImageFormat();
         VkExtent2D* getSwapChainExtent();
-        static VkImageView createImageView(VkDevice* logicalDevice, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
-        
+        VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+
     private:
         VkSurfaceFormatKHR chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats);
         VkPresentModeKHR chooseSwapPresentMode(const std::vector<VkPresentModeKHR>& availablePresentModes);
-        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities, GLFWwindow** windowPtr);
+        VkExtent2D chooseSwapExtent(const VkSurfaceCapabilitiesKHR& capabilities);
         VkSwapchainKHR swapChain;
         std::vector<VkImage> swapChainImages;
         std::vector<VkImageView> swapChainImageViews; // Store image views
@@ -44,5 +44,7 @@ namespace Engine {
         VkExtent2D swapChainExtent;
         VkDevice* logicalDevice;
         void createImageViews();
+        mainProgram** mainProg;
+        VkPhysicalDevice* physicalDevice;
     };
 }

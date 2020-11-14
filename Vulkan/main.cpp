@@ -4,12 +4,16 @@
 
 Engine::mainProgram::mainProgram(mainProgram** mainProgPtr)
 {
-	window = new Engine::Window(mainProgramPtr, &glfwWindow);
-	instance = new Engine::Instance(mainProgramPtr, &vkInstance);
-	debugger = new Engine::Debug(mainProgramPtr, &vkInstance);
-	device = new Engine::Device(mainProgramPtr, &vkInstance, &physicalDevice, &vkSurface);
-	surface = new Engine::Surface(mainProgramPtr, &vkInstance, &vkSurface, &glfwWindow);
-	swapchain = new Engine::SwapChain(mainProgramPtr, &vkSurface, &physicalDevice, &logicalDevice, &glfwWindow);
+	window = new Engine::Window(mainProgramPtr);
+	surface = new Engine::Surface(mainProgramPtr);
+	instance = new Engine::Instance(mainProgramPtr);
+	debugger = new Engine::Debug(mainProgramPtr);
+	device = new Engine::Device(mainProgramPtr);
+	surface->initSurface();
+	swapchain = new Engine::SwapChain(mainProgramPtr);
+	renderPass = new RenderPass(mainProgramPtr);
+	descriptorSet = new DescriptorSet(mainProgramPtr);
+	pipeline = new Pipeline(mainProgramPtr);
 }
 
 int main() {
