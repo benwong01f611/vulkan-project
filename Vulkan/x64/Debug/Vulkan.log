@@ -1,0 +1,13 @@
+﻿  debug.cpp
+  device.cpp
+  instance.cpp
+  main.cpp
+  renderpass.cpp
+  surface.cpp
+  swapchain.cpp
+  window.cpp
+  Generating Code...
+D:\Dev_Game\Vulkan_test\Vulkan\Vulkan\swapchain.cpp(154): warning C4715: 'Engine::SwapChain::chooseSwapPresentMode': not all control paths return a value
+D:\Dev_Game\Vulkan_test\Vulkan\Vulkan\swapchain.cpp(170): warning C4715: 'Engine::SwapChain::chooseSwapExtent': not all control paths return a value
+LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+  Vulkan.vcxproj -> D:\Dev_Game\Vulkan_test\Vulkan\x64\Debug\Vulkan.exe
