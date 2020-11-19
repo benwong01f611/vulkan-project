@@ -133,14 +133,15 @@ bool Engine::Device::isDeviceSuitable(VkPhysicalDevice device)
     /*
     return true;
     */
-    std::cout << "isDeviceSuitable" << std::endl;
     QueueFamilyIndices indices = findQueueFamilies(device);
     bool extensionsSupported = checkDeviceExtensionSupport(device);
 
     // Verify swap chain is adequate (sufficient)
     bool swapChainAdequate = false;
     if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = (*mainProg)->swapchain->querySwapChainSupport(device);
+        SwapChain* tempSwapChain = new SwapChain(mainProg, true);
+        SwapChainSupportDetails swapChainSupport = tempSwapChain->querySwapChainSupport(device);
+        delete tempSwapChain;
         // If the swapChainSupport formats and presentModes are NOT empty, swapChainAdequate will be true
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }

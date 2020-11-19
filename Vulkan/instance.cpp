@@ -3,8 +3,9 @@
 
 namespace Engine {
     Instance::Instance(mainProgram** mainProgramPtr) {
-        
+        mainProg = mainProgramPtr;
         // If validation layers are enabled but the requested validation layers are not available, throw an exception
+        std::cout<<(*mainProg)->debugger->enableValidationLayers<<std::endl;
         if ((*mainProg)->debugger->enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }

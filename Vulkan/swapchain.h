@@ -25,6 +25,7 @@ namespace Engine {
     class SwapChain {
     public:
         SwapChain(mainProgram** mainProgramPtr);
+        SwapChain(mainProgram** mainProgramPtr, bool isTemp);
         ~SwapChain();
         SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
         VkSwapchainKHR* getSwapChain();

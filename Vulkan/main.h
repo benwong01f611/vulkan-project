@@ -26,8 +26,9 @@ namespace Engine {
 	class Model;
 	class mainProgram {
 	public:
-		mainProgram(mainProgram** mainProgPtr);
+		mainProgram();
 		~mainProgram();
+		void init(mainProgram** mainProgPtr);
 		Window* window;
 		Instance* instance;
 		Debug* debugger;
@@ -41,7 +42,7 @@ namespace Engine {
 		VkPhysicalDevice physicalDevice;
 		VkDevice logicalDevice;
 		VkSurfaceKHR vkSurface;*/
-		bool framebufferResized = false;
+		bool framebufferResized;
 		mainProgram** mainProgramPtr;
 	};
 	

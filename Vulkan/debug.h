@@ -22,7 +22,7 @@ namespace Engine {
 		#else
 				const bool enableValidationLayers = true;
 		#endif
-
+				void initDebug();
 		const std::vector<const char*> validationLayers = {
 				"VK_LAYER_KHRONOS_validation"
 		};;
@@ -35,6 +35,7 @@ namespace Engine {
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance vkinstance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
+		mainProgram** mainProgPtr;
 
 	};
 }

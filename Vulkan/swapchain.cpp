@@ -92,6 +92,10 @@ namespace Engine {
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
     }
+    SwapChain::SwapChain(mainProgram** mainProgramPtr, bool isTemp)
+    {
+        mainProg = mainProgramPtr;
+    }
     SwapChain::~SwapChain()
     {
     }

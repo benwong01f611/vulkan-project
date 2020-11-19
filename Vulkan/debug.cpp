@@ -4,14 +4,7 @@
 
 Engine::Debug::Debug(mainProgram** mainProgramPtr)
 {
-    instance = (*mainProgramPtr)->instance->getInstance();
-    // If validation layers are disabled then we don't need to set it up
-    if (!enableValidationLayers) return;
-    VkDebugUtilsMessengerCreateInfoEXT createInfo;
-    populateDebugMessengerCreateInfo(createInfo);
-    if (CreateDebugUtilsMessengerEXT(*instance, &createInfo, nullptr, &(Debug::debugMessenger)) != VK_SUCCESS) {
-        throw std::runtime_error("failed to set up debug messenger!");
-    }
+    mainProgPtr = mainProgramPtr;
 }
 
 Engine::Debug::~Debug()
@@ -32,6 +25,18 @@ void Engine::Debug::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreate
     createInfo.messageType = VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT;
     createInfo.pfnUserCallback = debugCallback;
     createInfo.pUserData = nullptr; // Optional
+}
+
+void Engine::Debug::initDebug()
+{
+    instance = (*mainProgPtr)->instance->getInstance();
+    // If validation layers are disabled then we don't need to set it up
+    if (!enableValidationLayers) return;
+    VkDebugUtilsMessengerCreateInfoEXT createInfo;
+    populateDebugMessengerCreateInfo(createInfo);
+    if (CreateDebugUtilsMessengerEXT(*instance, &createInfo, nullptr, &(Debug::debugMessenger)) != VK_SUCCESS) {
+        throw std::runtime_error("failed to set up debug messenger!");
+    }
 }
 
 VKAPI_ATTR VkBool32 VKAPI_CALL Engine::Debug::debugCallback(VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity, VkDebugUtilsMessageTypeFlagsEXT messageType, const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData, void* pUserData)

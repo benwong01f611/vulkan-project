@@ -22,7 +22,7 @@ namespace Engine {
 
 		glfwSetKeyCallback(window, keyInput::keyCallback);
 
-		(*mainProgramPtr)->framebufferResized = false;
+		(*mainProg)->framebufferResized = false;
 	}
 	Window::~Window() {
 		glfwDestroyWindow(window); // Destroy the application window
