@@ -153,12 +153,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="commandPool.cpp" />
     <ClCompile Include="debug.cpp" />
     <ClCompile Include="descriptor_set.cpp" />
     <ClCompile Include="device.cpp" />
+    <ClCompile Include="image.cpp" />
     <ClCompile Include="instance.cpp" />
     <ClCompile Include="keyInput.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="memory.cpp" />
     <ClCompile Include="model.cpp" />
     <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="renderpass.cpp" />
@@ -167,12 +170,15 @@
     <ClCompile Include="window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="commandPool.h" />
     <ClInclude Include="debug.h" />
     <ClInclude Include="descriptor_set.h" />
     <ClInclude Include="device.h" />
+    <ClInclude Include="image.h" />
     <ClInclude Include="instance.h" />
     <ClInclude Include="keyInput.h" />
     <ClInclude Include="main.h" />
+    <ClInclude Include="memory.h" />
     <ClInclude Include="model.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="renderpass.h" />
