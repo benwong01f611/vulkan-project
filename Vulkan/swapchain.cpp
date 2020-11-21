@@ -142,6 +142,10 @@ namespace Engine {
     {
         return &swapChainExtent;
     }
+    std::vector<VkImageView>* SwapChain::getSwapChainImageViews()
+    {
+        return &swapChainImageViews;
+    }
     VkSurfaceFormatKHR SwapChain::chooseSwapSurfaceFormat(const std::vector<VkSurfaceFormatKHR>& availableFormats)
     {
         // Set the current format to SRGB for now

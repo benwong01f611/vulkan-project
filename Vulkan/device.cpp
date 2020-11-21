@@ -235,3 +235,8 @@ VkDevice* Engine::Device::getLogicalDevice()
 {
     return &logicalDevice;
 }
+
+VkQueue* Engine::Device::getGraphicsQueue()
+{
+    return &graphicsQueue;
+}

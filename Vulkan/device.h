@@ -19,6 +19,7 @@ namespace Engine {
 		VkSampleCountFlagBits* getMSAASamples(bool isMax);
 		VkPhysicalDevice* getPhysicalDevice();
 		VkDevice* getLogicalDevice();
+		VkQueue* getGraphicsQueue();
 		
 	private:
 		//VkPhysicalDevice* physicalDevice;

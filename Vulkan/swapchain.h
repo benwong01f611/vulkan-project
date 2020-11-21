@@ -32,6 +32,7 @@ namespace Engine {
         std::vector<VkImage>* getSwapChainImages();
         VkFormat* getSwapChainImageFormat();
         VkExtent2D* getSwapChainExtent();
+        std::vector<VkImageView>* getSwapChainImageViews();
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
 
     private:

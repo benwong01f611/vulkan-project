@@ -156,7 +156,7 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = nullptr; // Optional
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = (*mainProgramPtr)->renderPass->getRenderPass();
+    pipelineInfo.renderPass = *(*mainProgramPtr)->renderPass->getRenderPass();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 

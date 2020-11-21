@@ -14,6 +14,10 @@
 #include "pipeline.h"
 #include "commandPool.h"
 #include "memory.h"
+#include "image.h"
+#include "framebuffer.h"
+#include "buffer.h"
+#include "commandBuffer.h"
 
 namespace Engine {
 	class Window;
@@ -28,6 +32,10 @@ namespace Engine {
 	class Model;
 	class CommandPool;
 	class Memory;
+	class Image;
+	class FrameBuffer;
+	class Buffer;
+	class CommandBuffer;
 	class mainProgram {
 	public:
 		mainProgram();
@@ -44,6 +52,10 @@ namespace Engine {
 		Pipeline* pipeline;
 		CommandPool* commandPool;
 		Memory* memory;
+		Image* image;
+		FrameBuffer* frameBuffer;
+		Buffer* buffer;
+		CommandBuffer* commandBuffer;
 		/*VkInstance vkInstance;
 		VkPhysicalDevice physicalDevice;
 		VkDevice logicalDevice;

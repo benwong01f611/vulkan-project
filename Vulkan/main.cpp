@@ -11,6 +11,8 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	mainProgramPtr = mainProgPtr;
 
 	memory = new Engine::Memory(mainProgramPtr);
+	buffer = new Engine::Buffer(mainProgramPtr);
+	commandBuffer = new Engine::CommandBuffer(mainProgramPtr);
 
 	window = new Engine::Window(mainProgramPtr);
 	debugger = new Engine::Debug(mainProgramPtr);
@@ -22,6 +24,8 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	descriptorSet = new Engine::DescriptorSet(mainProgramPtr);
 	pipeline = new Engine::Pipeline(mainProgramPtr);
 	commandPool = new Engine::CommandPool(mainProgramPtr);
+	image = new Engine::Image(mainProgramPtr);
+	frameBuffer = new Engine::FrameBuffer(mainProgramPtr);
 }
 
 int main() {
