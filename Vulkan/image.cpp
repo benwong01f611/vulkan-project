@@ -132,6 +132,7 @@ VkDeviceMemory* Engine::Image::getDepthImageMemory()
 
 void Engine::Image::createTexture()
 {
+    // createTextureImage
     int texWidth, texHeight, texChannels;
     // texChannels is the number of channels (color)
     //stbi_uc* pixels = stbi_load("textures/texture.jpg", &texWidth, &texHeight, &texChannels, STBI_rgb_alpha);
@@ -179,9 +180,11 @@ void Engine::Image::createTexture()
     vkFreeMemory(*device, stagingBufferMemory, nullptr);
 
 
+    // createTextureImageView
     textureImageView = createImageView(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_ASPECT_COLOR_BIT, mipLevels);
 
     
+    // createTextureSampler
     VkSamplerCreateInfo samplerInfo{};
     samplerInfo.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     // How to interpolate texels that are magnified or minified

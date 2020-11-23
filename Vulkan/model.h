@@ -13,7 +13,9 @@
 #include <glm/gtx/hash.hpp>
 
 #include <array>
+#include "main.h"
 namespace Engine {
+    class mainProgram;
 	class Model {
 	public:
         struct Vertex {
@@ -75,7 +77,18 @@ namespace Engine {
             }
         };
 
-        
+
+
+        Model(mainProgram** mainProgramPtr);
+        ~Model();
+        void loadModel();
+        bool hasStencilComponent(VkFormat format);
+        std::string model_path = "obj/viking_room.obj";
+    private:
+        mainProgram** mainProg;
+
+        std::vector<Vertex> vertices;
+        std::vector<uint32_t> indices;
 	};
 }
 
