@@ -1,3 +1,7 @@
+#ifndef MODELVERTEX
+#define MODELVERTEX
+
+
 #pragma once
 // Include GLFW
 #define GLFW_INCLUDE_VULKAN
@@ -16,8 +20,8 @@
 #include "main.h"
 namespace Engine {
     class mainProgram;
-	class Model {
-	public:
+    class Model {
+    public:
         struct Vertex {
             glm::vec3 pos;
             glm::vec3 color;
@@ -83,13 +87,25 @@ namespace Engine {
         ~Model();
         void loadModel();
         bool hasStencilComponent(VkFormat format);
+        void createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, VkMemoryPropertyFlags properties, VkBuffer& buffer, VkDeviceMemory& bufferMemory);
+        void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
+        void createVertexBuffer();
+        void createIndexBuffer();
+
         std::string model_path = "obj/viking_room.obj";
-    private:
-        mainProgram** mainProg;
 
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
-	};
+    private:
+        mainProgram** mainProg;
+
+        VkDevice* logicalDevice;
+        VkBuffer vertexBuffer;
+        VkDeviceMemory vertexBufferMemory;
+        VkBuffer indexBuffer;
+        VkDeviceMemory indexBufferMemory;
+
+    };
 }
 
 namespace std {
@@ -99,3 +115,6 @@ namespace std {
         }
     };
 }
+
+#endif // !MODELVERTEX
+

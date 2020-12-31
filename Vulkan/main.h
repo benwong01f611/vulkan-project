@@ -18,6 +18,8 @@
 #include "framebuffer.h"
 #include "buffer.h"
 #include "commandBuffer.h"
+#include "image.h"
+#include "model.h"
 
 namespace Engine {
 	class Window;
@@ -56,10 +58,7 @@ namespace Engine {
 		FrameBuffer* frameBuffer;
 		Buffer* buffer;
 		CommandBuffer* commandBuffer;
-		/*VkInstance vkInstance;
-		VkPhysicalDevice physicalDevice;
-		VkDevice logicalDevice;
-		VkSurfaceKHR vkSurface;*/
+		Model* model;
 		bool framebufferResized;
 		mainProgram** mainProgramPtr;
 	};

@@ -11,8 +11,9 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	mainProgramPtr = mainProgPtr;
 
 	memory = new Engine::Memory(mainProgramPtr);
-	buffer = new Engine::Buffer(mainProgramPtr);
+	//buffer = new Engine::Buffer(mainProgramPtr);
 	commandBuffer = new Engine::CommandBuffer(mainProgramPtr);
+	model = new Engine::Model(mainProgramPtr);
 
 	window = new Engine::Window(mainProgramPtr);
 	debugger = new Engine::Debug(mainProgramPtr);
@@ -26,6 +27,12 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	commandPool = new Engine::CommandPool(mainProgramPtr);
 	image = new Engine::Image(mainProgramPtr);
 	frameBuffer = new Engine::FrameBuffer(mainProgramPtr);
+	image->createTexture();
+	model->loadModel();
+	model->createVertexBuffer();
+	model->createIndexBuffer();
+	
+	std::cout << "Program end" << std::endl;
 }
 
 int main() {
