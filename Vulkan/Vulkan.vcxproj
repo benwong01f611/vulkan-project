@@ -157,6 +157,7 @@
     <ClCompile Include="commandBuffer.cpp" />
     <ClCompile Include="commandPool.cpp" />
     <ClCompile Include="debug.cpp" />
+    <ClCompile Include="descriptor_pool.cpp" />
     <ClCompile Include="descriptor_set.cpp" />
     <ClCompile Include="device.cpp" />
     <ClCompile Include="framebuffer.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="commandBuffer.h" />
     <ClInclude Include="commandPool.h" />
     <ClInclude Include="debug.h" />
+    <ClInclude Include="descriptor_pool.h" />
     <ClInclude Include="descriptor_set.h" />
     <ClInclude Include="device.h" />
     <ClInclude Include="framebuffer.h" />

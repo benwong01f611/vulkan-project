@@ -22,6 +22,11 @@ namespace Engine {
     class mainProgram;
     class Model {
     public:
+        struct UniformBufferObject {
+            glm::mat4 model;
+            glm::mat4 view;
+            glm::mat4 proj;
+        };
         struct Vertex {
             glm::vec3 pos;
             glm::vec3 color;
@@ -91,6 +96,8 @@ namespace Engine {
         void copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size);
         void createVertexBuffer();
         void createIndexBuffer();
+        void createUniformBuffers();
+
 
         std::string model_path = "obj/viking_room.obj";
 
@@ -104,6 +111,8 @@ namespace Engine {
         VkDeviceMemory vertexBufferMemory;
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferMemory;
+        std::vector<VkBuffer> uniformBuffers;
+        std::vector<VkDeviceMemory> uniformBuffersMemory;
 
     };
 }

@@ -32,7 +32,7 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	model->createVertexBuffer();
 	model->createIndexBuffer();
 	
-	std::cout << "Program end" << std::endl;
+	std::cout << "Program end!" << std::endl;
 }
 
 int main() {

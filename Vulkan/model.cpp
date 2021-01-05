@@ -150,3 +150,14 @@ void Engine::Model::createIndexBuffer()
     vkDestroyBuffer(*logicalDevice, stagingBuffer, nullptr);
     vkFreeMemory(*logicalDevice, stagingBufferMemory, nullptr);
 }
+
+void Engine::Model::createUniformBuffers()
+{
+    VkDeviceSize bufferSize = sizeof(UniformBufferObject);
+    std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
+    uniformBuffers.resize(swapChainImages.size()); // Resize the uniform buffers to match with the size of swapchain
+    uniformBuffersMemory.resize(swapChainImages.size());
+    for (size_t i = 0; i < swapChainImages.size(); i++) {
+        createBuffer(bufferSize, VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, uniformBuffers[i], uniformBuffersMemory[i]);
+    }
+}
