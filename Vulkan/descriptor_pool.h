@@ -2,9 +2,10 @@
 #include "main.h"
 namespace Engine {
 	class mainProgram;
-	class Descriptor_Pool {
+	class DescriptorPool {
 	public:
-		Descriptor_Pool(mainProgram** mainProgramPtr);
+		DescriptorPool(mainProgram** mainProgramPtr);
+		VkDescriptorPool* getDescriptorPool();
 	private:
 		mainProgram** mainProg;
 		VkDescriptorPool descriptorPool;

@@ -98,6 +98,8 @@ namespace Engine {
         void createIndexBuffer();
         void createUniformBuffers();
 
+        std::vector<VkBuffer>* getUniformBuffers();
+        std::vector<VkDeviceMemory>* getUniformBuffersMemory();
 
         std::string model_path = "obj/viking_room.obj";
 

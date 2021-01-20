@@ -4,6 +4,7 @@
 
 Engine::DescriptorSet::DescriptorSet(mainProgram** mainProgramPtr)
 {
+    mainProg = mainProgramPtr;
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0; // Binding used in shader
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -32,7 +33,65 @@ Engine::DescriptorSet::DescriptorSet(mainProgram** mainProgramPtr)
     
 }
 
+
+
 VkDescriptorSetLayout* Engine::DescriptorSet::getDescriptorSetLayout()
 {
     return &descriptorSetLayout;
+}
+
+void Engine::DescriptorSet::createDescriptorSets()
+{
+    std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
+    std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
+    VkDescriptorSetAllocateInfo allocInfo{};
+    allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+    allocInfo.descriptorPool = *(*mainProg)->descriptorPool->getDescriptorPool();
+    // Descriptor set count == number of images in swap chain
+    allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
+    allocInfo.pSetLayouts = layouts.data();
+
+    // Number of descriptor sets == number of images in swap chain
+    descriptorSets.resize(swapChainImages.size());
+    if (vkAllocateDescriptorSets(*(*mainProg)->device->getLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+        throw std::runtime_error("failed to allocate descriptor sets!");
+    }
+
+    // For each descriptor set
+    std::vector<VkBuffer> uniformBuffers = *(*mainProg)->model->getUniformBuffers();
+    for (size_t i = 0; i < swapChainImages.size(); i++) {
+        VkDescriptorBufferInfo bufferInfo{};
+        bufferInfo.buffer = uniformBuffers[i];
+        bufferInfo.offset = 0;
+        // Use VK_WHOLE_SIZE t overwriting the whole buffer
+        bufferInfo.range = sizeof(Model::UniformBufferObject);
+        
+        
+        // Bind actual image and sampler resources to descriptors in descriptor set
+        VkDescriptorImageInfo imageInfo{};
+        imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+        imageInfo.imageView = *(*mainProg)->image->getTextureImageView();
+        imageInfo.sampler = *(*mainProg)->image->getTextureSampler();
+
+        std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
+
+        descriptorWrites[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[0].dstSet = descriptorSets[i];
+        descriptorWrites[0].dstBinding = 0;
+        descriptorWrites[0].dstArrayElement = 0;
+        descriptorWrites[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+        descriptorWrites[0].descriptorCount = 1;
+        descriptorWrites[0].pBufferInfo = &bufferInfo;
+
+        descriptorWrites[1].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+        descriptorWrites[1].dstSet = descriptorSets[i];
+        descriptorWrites[1].dstBinding = 1;
+        descriptorWrites[1].dstArrayElement = 0;
+        descriptorWrites[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        descriptorWrites[1].descriptorCount = 1;
+        descriptorWrites[1].pImageInfo = &imageInfo;
+
+        // Update descriptor sets for each images
+        vkUpdateDescriptorSets(*(*mainProg)->device->getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+    }
 }

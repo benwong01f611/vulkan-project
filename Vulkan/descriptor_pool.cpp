@@ -1,6 +1,6 @@
 #include "descriptor_pool.h"
 
-Engine::Descriptor_Pool::Descriptor_Pool(mainProgram** mainProgPtr)
+Engine::DescriptorPool::DescriptorPool(mainProgram** mainProgPtr)
 {   
     mainProg = mainProgPtr;
     std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
@@ -23,4 +23,9 @@ Engine::Descriptor_Pool::Descriptor_Pool(mainProgram** mainProgPtr)
     if (vkCreateDescriptorPool(*(*mainProg)->device->getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
+}
+
+VkDescriptorPool* Engine::DescriptorPool::getDescriptorPool()
+{
+    return &descriptorPool;
 }

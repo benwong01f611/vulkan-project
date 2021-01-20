@@ -20,7 +20,7 @@
 #include "commandBuffer.h"
 #include "image.h"
 #include "model.h"
-
+#include "descriptor_pool.h"
 namespace Engine {
 	class Window;
 	class Instance;
@@ -38,6 +38,8 @@ namespace Engine {
 	class FrameBuffer;
 	class Buffer;
 	class CommandBuffer;
+	class DescriptorPool;
+
 	class mainProgram {
 	public:
 		mainProgram();
@@ -61,6 +63,7 @@ namespace Engine {
 		Model* model;
 		bool framebufferResized;
 		mainProgram** mainProgramPtr;
+		DescriptorPool* descriptorPool;
 	};
 	
 	

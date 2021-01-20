@@ -21,21 +21,27 @@ namespace Engine {
 		VkImage* getDepthImage();
 		VkImageView* getDepthImageView();
 		VkDeviceMemory* getDepthImageMemory();
+		VkImageView* getTextureImageView();
+		VkSampler* getTextureSampler();
 		void createTexture();
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 	private:
 		mainProgram** mainProg;
-		VkImageView colorImageView;
 		VkDevice* device;
+
 		VkImage colorImage;
 		VkDeviceMemory colorImageMemory;
+		VkImageView colorImageView;
+
 		VkImage depthImage;
 		VkDeviceMemory depthImageMemory;
 		VkImageView depthImageView;
+
 		VkImage textureImage;
 		VkDeviceMemory textureImageMemory;
 		VkImageView textureImageView;
+
 		VkSampler textureSampler;
 		std::string texture_path = "obj/viking_room.png";
 		uint32_t mipLevels;

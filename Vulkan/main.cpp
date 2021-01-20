@@ -31,6 +31,10 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	model->loadModel();
 	model->createVertexBuffer();
 	model->createIndexBuffer();
+	model->createUniformBuffers();
+
+	descriptorPool = new Engine::DescriptorPool(mainProgramPtr);
+	descriptorSet->createDescriptorSets();
 	
 	std::cout << "Program end!" << std::endl;
 }

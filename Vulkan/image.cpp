@@ -130,6 +130,16 @@ VkDeviceMemory* Engine::Image::getDepthImageMemory()
     return &depthImageMemory;
 }
 
+VkImageView* Engine::Image::getTextureImageView()
+{
+    return &textureImageView;
+}
+
+VkSampler* Engine::Image::getTextureSampler()
+{
+    return &textureSampler;
+}
+
 void Engine::Image::createTexture()
 {
     // createTextureImage
