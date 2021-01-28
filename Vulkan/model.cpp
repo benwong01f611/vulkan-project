@@ -171,3 +171,17 @@ std::vector<VkDeviceMemory>* Engine::Model::getUniformBuffersMemory()
 {
     return &uniformBuffersMemory;
 }
+
+Engine::Model::~Model() {
+    // Destroy uniform buffer
+    for (size_t i = 0; i < (*(*mainProg)->swapchain->getSwapChainImages()).size(); i++) {
+        vkDestroyBuffer(*logicalDevice, uniformBuffers[i], nullptr);
+        vkFreeMemory(*logicalDevice, uniformBuffersMemory[i], nullptr);
+    }
+
+    vkDestroyBuffer(*logicalDevice, indexBuffer, nullptr);
+    vkFreeMemory(*logicalDevice, indexBufferMemory, nullptr);
+
+    vkDestroyBuffer(*logicalDevice, vertexBuffer, nullptr);
+    vkFreeMemory(*logicalDevice, vertexBufferMemory, nullptr);
+}

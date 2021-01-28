@@ -31,3 +31,11 @@ Engine::FrameBuffer::FrameBuffer(mainProgram** mainProgramPtr)
         }
     }
 }
+
+Engine::FrameBuffer::~FrameBuffer()
+{
+    // Destroy all framebuffers in swap chain
+    for (auto framebuffer : swapChainFramebuffers) {
+        vkDestroyFramebuffer(*(*mainProg)->device->getLogicalDevice(), framebuffer, nullptr);
+    }
+}

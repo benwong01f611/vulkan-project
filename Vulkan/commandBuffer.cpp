@@ -5,6 +5,12 @@ Engine::CommandBuffer::CommandBuffer(mainProgram** mainProgramPtr)
 	mainProg = mainProgramPtr;
 }
 
+Engine::CommandBuffer::~CommandBuffer() {
+    // Recreating command buffers is wasteful (?), which can reuse existing pool to allocate new command buffers
+        // Like destroying the object requires time to recreate, so free up the content is much more efficient than destroying the object
+    //vkFreeCommandBuffers(*(*mainProg)->device->getLogicalDevice(), *(*mainProg)->commandPool->getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+}
+
 VkCommandBuffer Engine::CommandBuffer::beginSingleTimeCommands()
 {
     // This function is for copying the staging buffer to vertex buffer

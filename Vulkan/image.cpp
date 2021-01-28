@@ -6,9 +6,26 @@
 Engine::Image::Image(mainProgram** mainProgramPtr)
 {
 	mainProg = mainProgramPtr;
-    device = (*mainProg)->device->getLogicalDevice();
+    logicalDevice = (*mainProg)->device->getLogicalDevice();
     createColorResources();
     createDepthResources();
+}
+
+Engine::Image::~Image()
+{
+    vkDestroyImageView(*logicalDevice, colorImageView, nullptr);
+    vkDestroyImage(*logicalDevice, colorImage, nullptr);
+    vkFreeMemory(*logicalDevice, colorImageMemory, nullptr);
+
+    vkDestroyImageView(*logicalDevice, depthImageView, nullptr);
+    vkDestroyImage(*logicalDevice, depthImage, nullptr);
+    vkFreeMemory(*logicalDevice, depthImageMemory, nullptr);
+
+    vkDestroySampler(*logicalDevice, textureSampler, nullptr);
+    vkDestroyImageView(*logicalDevice, textureImageView, nullptr);
+
+    vkDestroyImage(*logicalDevice, textureImage, nullptr);
+    vkFreeMemory(*logicalDevice, textureImageMemory, nullptr);
 }
 
 void Engine::Image::createColorResources()
@@ -59,23 +76,23 @@ VkImage Engine::Image::createImage(uint32_t width, uint32_t height, uint32_t mip
     imageInfo.flags = 0; // Optional
 
     // Create image
-    if (vkCreateImage(*device, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+    if (vkCreateImage(*logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(*device, image, &memRequirements);
+    vkGetImageMemoryRequirements(*logicalDevice, image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
     allocInfo.memoryTypeIndex = (*mainProg)->memory->findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(*device, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(*logicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(*device, image, imageMemory, 0);
+    vkBindImageMemory(*logicalDevice, image, imageMemory, 0);
 }
 
 VkImageView* Engine::Image::getColorImageView()
@@ -98,7 +115,7 @@ VkImageView Engine::Image::createImageView(VkImage image, VkFormat format, VkIma
     viewInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageView;
-    if (vkCreateImageView(*device, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+    if (vkCreateImageView(*logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 

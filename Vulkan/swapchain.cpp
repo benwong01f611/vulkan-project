@@ -95,9 +95,19 @@ namespace Engine {
     SwapChain::SwapChain(mainProgram** mainProgramPtr, bool isTemp)
     {
         mainProg = mainProgramPtr;
+        isSwapChainTemp = isTemp;
     }
     SwapChain::~SwapChain()
     {
+        if (!isSwapChainTemp) {
+            // Destroy all image views
+            for (auto imageView : swapChainImageViews) {
+                vkDestroyImageView(*logicalDevice, imageView, nullptr);
+            }
+
+            // Destroy swap chain
+            vkDestroySwapchainKHR(*logicalDevice, swapChain, nullptr);
+        }
     }
     SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device)
     {

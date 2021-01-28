@@ -170,6 +170,12 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     vkDestroyShaderModule(*logicalDevice, vertShaderModule, nullptr);
 }
 
+Engine::Pipeline::~Pipeline()
+{
+    vkDestroyPipeline(*logicalDevice, graphicsPipeline, nullptr); // Destroy pipeline
+    vkDestroyPipelineLayout(*logicalDevice, pipelineLayout, nullptr); // Destroy this unknown shit
+}
+
 std::vector<char> Engine::Pipeline::readFile(const std::string& filename) {
     // ate means start reading at the end of the file
     // binary means read the file as binary file (avoid text transformations)

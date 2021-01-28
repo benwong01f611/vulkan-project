@@ -75,7 +75,7 @@ namespace Engine {
         }
     }
     Instance::~Instance() {
-
+        vkDestroyInstance(instance, nullptr);
     }
 
     // Return the required list of extensions
@@ -126,4 +126,5 @@ namespace Engine {
     {
         return &instance;
     }
+
 }

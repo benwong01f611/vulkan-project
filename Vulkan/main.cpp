@@ -6,6 +6,26 @@ Engine::mainProgram::mainProgram()
 {
 }
 
+Engine::mainProgram::~mainProgram()
+{
+	delete image;
+	delete frameBuffer;
+	//delete commandBuffer;
+	delete pipeline;
+	delete renderPass;
+	delete model;
+	delete swapchain;
+	delete descriptorPool;
+	delete descriptorSet;
+	delete commandPool;
+	delete device;
+	delete debugger;
+	delete surface;
+	delete instance;
+	delete window;
+
+}
+
 
 void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	mainProgramPtr = mainProgPtr;
@@ -32,10 +52,11 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
 	model->createVertexBuffer();
 	model->createIndexBuffer();
 	model->createUniformBuffers();
-
 	descriptorPool = new Engine::DescriptorPool(mainProgramPtr);
 	descriptorSet->createDescriptorSets();
 	
+	// mainLoop drawing event
+	//mainLoop();
 	std::cout << "Program end!" << std::endl;
 }
 

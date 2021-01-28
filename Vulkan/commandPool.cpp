@@ -35,3 +35,6 @@ VkCommandPool* Engine::CommandPool::getCommandPool()
 {
     return &commandPool;
 }
+Engine::CommandPool::~CommandPool() {
+    vkDestroyCommandPool(*(*mainProg)->device->getLogicalDevice(), commandPool, nullptr);
+}

@@ -28,7 +28,7 @@ namespace Engine {
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 	private:
 		mainProgram** mainProg;
-		VkDevice* device;
+		VkDevice* logicalDevice;
 
 		VkImage colorImage;
 		VkDeviceMemory colorImageMemory;

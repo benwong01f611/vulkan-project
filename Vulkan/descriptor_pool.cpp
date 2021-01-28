@@ -29,3 +29,7 @@ VkDescriptorPool* Engine::DescriptorPool::getDescriptorPool()
 {
     return &descriptorPool;
 }
+
+Engine::DescriptorPool::~DescriptorPool() {
+    vkDestroyDescriptorPool(*(*mainProg)->device->getLogicalDevice(), descriptorPool, nullptr);
+}

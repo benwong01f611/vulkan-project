@@ -113,6 +113,10 @@ Engine::RenderPass::RenderPass(mainProgram** mainProgramPtr)
     }
 
 }
+Engine::RenderPass::~RenderPass()
+{
+    vkDestroyRenderPass(*(*mainProg)->device->getLogicalDevice(), renderPass, nullptr);
+}
 VkFormat Engine::RenderPass::findDepthFormat() {
     // S8_UINT contains stencil component
     return findSupportedFormat(

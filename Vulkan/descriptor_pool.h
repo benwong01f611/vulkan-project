@@ -5,6 +5,7 @@ namespace Engine {
 	class DescriptorPool {
 	public:
 		DescriptorPool(mainProgram** mainProgramPtr);
+		~DescriptorPool();
 		VkDescriptorPool* getDescriptorPool();
 	private:
 		mainProgram** mainProg;

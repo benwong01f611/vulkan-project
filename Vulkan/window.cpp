@@ -26,6 +26,7 @@ namespace Engine {
 	}
 	Window::~Window() {
 		glfwDestroyWindow(window); // Destroy the application window
+		glfwTerminate();
 	}
 	void Window::framebufferResizeCallback(GLFWwindow* window, int width, int height)
 	{
@@ -37,6 +38,5 @@ namespace Engine {
 	{
 		return &window;
 	}
-
 
 }

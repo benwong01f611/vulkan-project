@@ -7,6 +7,7 @@ namespace Engine {
 	class FrameBuffer {
 	public:
 		FrameBuffer(mainProgram** mainProgramPtr);
+		~FrameBuffer();
 	private:
 		mainProgram** mainProg;
 		std::vector<VkFramebuffer> swapChainFramebuffers; // Vector to hold framebuffers

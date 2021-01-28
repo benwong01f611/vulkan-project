@@ -86,8 +86,6 @@ namespace Engine {
             }
         };
 
-
-
         Model(mainProgram** mainProgramPtr);
         ~Model();
         void loadModel();
