@@ -9,6 +9,7 @@ namespace Engine {
 	public:
 		DescriptorSet(mainProgram** mainProgramPtr);
 		VkDescriptorSetLayout* getDescriptorSetLayout();
+		std::vector<VkDescriptorSet>* getDescriptorSets();
 		void createDescriptorSets();
 	private:
 		VkDescriptorSetLayout descriptorSetLayout;

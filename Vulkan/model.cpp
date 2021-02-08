@@ -172,6 +172,26 @@ std::vector<VkDeviceMemory>* Engine::Model::getUniformBuffersMemory()
     return &uniformBuffersMemory;
 }
 
+VkBuffer* Engine::Model::getIndexBuffers()
+{
+    return &indexBuffer;
+}
+
+VkDeviceMemory* Engine::Model::getIndexBuffersMemory()
+{
+    return &indexBufferMemory;
+}
+
+VkBuffer* Engine::Model::getVertexBuffers()
+{
+    return &vertexBuffer;
+}
+
+VkDeviceMemory* Engine::Model::getVertexBuffersMemory()
+{
+    return &vertexBufferMemory;
+}
+
 Engine::Model::~Model() {
     // Destroy uniform buffer
     for (size_t i = 0; i < (*(*mainProg)->swapchain->getSwapChainImages()).size(); i++) {

@@ -98,6 +98,10 @@ namespace Engine {
 
         std::vector<VkBuffer>* getUniformBuffers();
         std::vector<VkDeviceMemory>* getUniformBuffersMemory();
+        VkBuffer* getIndexBuffers();
+        VkDeviceMemory* getIndexBuffersMemory();
+        VkBuffer* getVertexBuffers();
+        VkDeviceMemory* getVertexBuffersMemory();
 
         std::string model_path = "obj/viking_room.obj";
 

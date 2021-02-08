@@ -176,6 +176,16 @@ Engine::Pipeline::~Pipeline()
     vkDestroyPipelineLayout(*logicalDevice, pipelineLayout, nullptr); // Destroy this unknown shit
 }
 
+VkPipeline* Engine::Pipeline::getGraphicsPipeline()
+{
+    return &graphicsPipeline;
+}
+
+VkPipelineLayout* Engine::Pipeline::getPipelineLayout()
+{
+    return &pipelineLayout;
+}
+
 std::vector<char> Engine::Pipeline::readFile(const std::string& filename) {
     // ate means start reading at the end of the file
     // binary means read the file as binary file (avoid text transformations)

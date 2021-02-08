@@ -39,3 +39,8 @@ Engine::FrameBuffer::~FrameBuffer()
         vkDestroyFramebuffer(*(*mainProg)->device->getLogicalDevice(), framebuffer, nullptr);
     }
 }
+
+std::vector<VkFramebuffer>* Engine::FrameBuffer::getSwapChainFramebuffers()
+{
+    return &swapChainFramebuffers;
+}

@@ -12,7 +12,9 @@ namespace Engine {
 		VkCommandBuffer beginSingleTimeCommands();
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
+		void createCommandBuffers();
 	private:
 		mainProgram** mainProg;
+		std::vector<VkCommandBuffer> commandBuffers; // Command buffers
 	};
 }

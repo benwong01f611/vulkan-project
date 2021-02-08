@@ -40,6 +40,11 @@ VkDescriptorSetLayout* Engine::DescriptorSet::getDescriptorSetLayout()
     return &descriptorSetLayout;
 }
 
+std::vector<VkDescriptorSet>* Engine::DescriptorSet::getDescriptorSets()
+{
+    return &descriptorSets;
+}
+
 void Engine::DescriptorSet::createDescriptorSets()
 {
     std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
