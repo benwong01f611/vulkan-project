@@ -3,10 +3,11 @@
 // Include GLFW
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
+#include <iostream>
 
 #pragma once
 namespace Engine {
-    class keyInput {
+    class KeyInput {
     public:
         struct keyPress {
             bool press = false;
@@ -43,7 +44,7 @@ namespace Engine {
             keyPress zero;
             int8_t modifier;
         };
-
+        
         keyboardKeys keys;
 
         static void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);

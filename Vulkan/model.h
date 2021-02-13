@@ -18,8 +18,10 @@
 
 #include <array>
 #include "main.h"
+#include "keyInput.h"
 namespace Engine {
     class mainProgram;
+    class KeyInput;
     class Model {
     public:
         struct UniformBufferObject {
@@ -86,7 +88,7 @@ namespace Engine {
             }
         };
 
-        Model(mainProgram** mainProgramPtr);
+        Model(mainProgram** mainProgramPtr,KeyInput& keyInputref);
         ~Model();
         void loadModel();
         bool hasStencilComponent(VkFormat format);
@@ -102,11 +104,13 @@ namespace Engine {
         VkDeviceMemory* getIndexBuffersMemory();
         VkBuffer* getVertexBuffers();
         VkDeviceMemory* getVertexBuffersMemory();
-
+        void destroyUniformBuffer();
         std::string model_path = "obj/viking_room.obj";
 
         std::vector<Vertex> vertices;
         std::vector<uint32_t> indices;
+
+        void updateUniformBuffer(uint32_t currentImage);
     private:
         mainProgram** mainProg;
 
@@ -118,6 +122,8 @@ namespace Engine {
         std::vector<VkBuffer> uniformBuffers;
         std::vector<VkDeviceMemory> uniformBuffersMemory;
 
+        KeyInput& keyInput;
+        float viewCoor[3] = { 2.0f, 2.0f, 2.0f };
     };
 }
 

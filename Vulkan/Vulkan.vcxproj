@@ -169,6 +169,7 @@
     <ClCompile Include="model.cpp" />
     <ClCompile Include="pipeline.cpp" />
     <ClCompile Include="renderpass.cpp" />
+    <ClCompile Include="semaphores.cpp" />
     <ClCompile Include="surface.cpp" />
     <ClCompile Include="swapchain.cpp" />
     <ClCompile Include="window.cpp" />
@@ -190,6 +191,7 @@
     <ClInclude Include="model.h" />
     <ClInclude Include="pipeline.h" />
     <ClInclude Include="renderpass.h" />
+    <ClInclude Include="semaphores.h" />
     <ClInclude Include="surface.h" />
     <ClInclude Include="swapchain.h" />
     <ClInclude Include="window.h" />

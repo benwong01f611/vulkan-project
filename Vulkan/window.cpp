@@ -3,7 +3,7 @@
 #include "keyInput.h"
 
 namespace Engine {
-	Window::Window(mainProgram** mainProgramPtr) {
+	Window::Window(mainProgram** mainProgramPtr,KeyInput& keyInputref) : keyInput(keyInputref) {
 		mainProg = mainProgramPtr;
 		windowHeight = 600;
 		windowWidth = 800;
@@ -19,8 +19,7 @@ namespace Engine {
 		// Store an arbitrary pointer
 		glfwSetWindowUserPointer(window, this);
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
-
-		glfwSetKeyCallback(window, keyInput::keyCallback);
+		glfwSetKeyCallback(window, KeyInput::keyCallback);
 
 		(*mainProg)->framebufferResized = false;
 	}

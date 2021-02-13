@@ -3,8 +3,9 @@
 // tinyobjloader for 3D models
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tiny_obj_loader.h>
+#include <chrono>
 
-Engine::Model::Model(mainProgram** mainProgramPtr)
+Engine::Model::Model(mainProgram** mainProgramPtr,KeyInput& keyInputref) : keyInput(keyInputref)
 {
 	mainProg = mainProgramPtr;
 }
@@ -192,16 +193,72 @@ VkDeviceMemory* Engine::Model::getVertexBuffersMemory()
     return &vertexBufferMemory;
 }
 
-Engine::Model::~Model() {
+void Engine::Model::destroyUniformBuffer()
+{
     // Destroy uniform buffer
     for (size_t i = 0; i < (*(*mainProg)->swapchain->getSwapChainImages()).size(); i++) {
         vkDestroyBuffer(*logicalDevice, uniformBuffers[i], nullptr);
         vkFreeMemory(*logicalDevice, uniformBuffersMemory[i], nullptr);
     }
+}
+
+Engine::Model::~Model() {
+    destroyUniformBuffer();
 
     vkDestroyBuffer(*logicalDevice, indexBuffer, nullptr);
     vkFreeMemory(*logicalDevice, indexBufferMemory, nullptr);
 
     vkDestroyBuffer(*logicalDevice, vertexBuffer, nullptr);
     vkFreeMemory(*logicalDevice, vertexBufferMemory, nullptr);
+}
+
+void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
+    std::cout << keyInput.keys.W.press << "\t" << (*mainProg)->keyInput.keys.W.press << std::endl;
+    // Calculate time
+    // Static can preserve the variable value (init once only), so calling the function next time will have the original value
+    static auto startTime = std::chrono::high_resolution_clock::now();
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
+    time = 0.0f;
+    // On key press test
+    if (keyInput.keys.W.press) {
+        viewCoor[0] += 0.01f;
+    }
+    if (keyInput.keys.A.press) {
+        viewCoor[1] += 0.01f;
+    }
+    if (keyInput.keys.S.press) {
+        viewCoor[0] -= 0.01f;
+    }
+    if (keyInput.keys.D.press) {
+        viewCoor[1] -= 0.01f;
+    }
+    if (keyInput.keys.G.press) {
+        viewCoor[2] += 0.01f;
+    }
+    if (keyInput.keys.B.press) {
+        viewCoor[2] -= 0.01f;
+    }
+    if (keyInput.keys.T.press) {
+        for (int temp = 0; temp < 3; temp++)
+            viewCoor[temp] = 2.0f;
+    }
+    if (keyInput.keys.zero.press) {
+        for (int temp = 0; temp < 3; temp++)
+            viewCoor[temp] = 0.0f;
+    }
+    //std::cout << x << " " << y << " " << z <<std::endl;
+    // Define model, view and projection transformations
+    UniformBufferObject ubo{};
+    // Rotate Z with 90 degrees/s
+    VkExtent2D swapChainExtent = *(*mainProg)->swapchain->getSwapChainExtent();
+    ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.view = glm::lookAt(glm::vec3(viewCoor[0], viewCoor[1], viewCoor[2]), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+    ubo.proj = glm::perspective(glm::radians(90.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
+    ubo.proj[1][1] *= -1; // The Y-coordinate is inverted in OpenGL
+
+    void* data;
+    vkMapMemory(*(*mainProg)->device->getLogicalDevice(), uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+    memcpy(data, &ubo, sizeof(ubo));
+    vkUnmapMemory(*(*mainProg)->device->getLogicalDevice(), uniformBuffersMemory[currentImage]);
 }

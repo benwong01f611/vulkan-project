@@ -6,9 +6,10 @@
 
 namespace Engine {
 	class mainProgram;
+	class KeyInput;
 	class Window {
 		public:
-			Window(mainProgram** mainProgramPtr);
+			Window(mainProgram** mainProgramPtr,KeyInput& keyInputref);
 			~Window();
 
 			int windowWidth;
@@ -19,5 +20,6 @@ namespace Engine {
 		private:
 			GLFWwindow* window;
 			mainProgram** mainProg;
+			KeyInput& keyInput;
 	};
 };

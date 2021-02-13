@@ -21,6 +21,8 @@
 #include "image.h"
 #include "model.h"
 #include "descriptor_pool.h"
+#include "semaphores.h"
+#include "keyInput.h"
 namespace Engine {
 	class Window;
 	class Instance;
@@ -39,7 +41,8 @@ namespace Engine {
 	class Buffer;
 	class CommandBuffer;
 	class DescriptorPool;
-
+	class Semaphores;
+	class KeyInput;
 	class mainProgram {
 	public:
 		mainProgram();
@@ -64,6 +67,15 @@ namespace Engine {
 		bool framebufferResized;
 		mainProgram** mainProgramPtr;
 		DescriptorPool* descriptorPool;
+		Semaphores* semaphores;
+		KeyInput keyInput;
+		void mainLoop();
+		void cleanupSwapChain();
+		void recreateSwapChain();
+		void keyHandler(GLFWwindow* window, int key, int scancode, int action, int mods);
+	private:
+		void drawFrame();
+		size_t currentFrame = 0;
 	};
 	
 	

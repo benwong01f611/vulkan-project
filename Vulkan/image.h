@@ -26,6 +26,7 @@ namespace Engine {
 		void createTexture();
 		void transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels);
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
+		void cleanImages();
 	private:
 		mainProgram** mainProg;
 		VkDevice* logicalDevice;

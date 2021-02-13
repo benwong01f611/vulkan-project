@@ -18,11 +18,12 @@ namespace Engine {
 		static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		// If it is not in debug stage, disable the validation layers, else enable it
 		#ifdef NDEBUG
-				const bool enableValidationLayers = false;
+				const static bool enableValidationLayers = false;
 		#else
-				const bool enableValidationLayers = true;
+				const static bool enableValidationLayers = true;
 		#endif
-				void initDebug();
+		
+		void initDebug();
 		const std::vector<const char*> validationLayers = {
 				"VK_LAYER_KHRONOS_validation"
 		};;

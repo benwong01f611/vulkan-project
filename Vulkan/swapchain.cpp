@@ -91,6 +91,8 @@ namespace Engine {
         // Store them in global variables for future use
         swapChainImageFormat = surfaceFormat.format;
         swapChainExtent = extent;
+
+        createImageViews();
     }
     SwapChain::SwapChain(mainProgram** mainProgramPtr, bool isTemp)
     {
@@ -100,10 +102,7 @@ namespace Engine {
     SwapChain::~SwapChain()
     {
         if (!isSwapChainTemp) {
-            // Destroy all image views
-            for (auto imageView : swapChainImageViews) {
-                vkDestroyImageView(*logicalDevice, imageView, nullptr);
-            }
+            destroyImageViews();
 
             // Destroy swap chain
             vkDestroySwapchainKHR(*logicalDevice, swapChain, nullptr);
@@ -207,6 +206,13 @@ namespace Engine {
             swapChainImageViews[i] = createImageView(swapChainImages[i], swapChainImageFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
         }
     }
+    void SwapChain::destroyImageViews()
+    {
+        // Destroy all image views
+        for (auto imageView : swapChainImageViews) {
+            vkDestroyImageView(*logicalDevice, imageView, nullptr);
+        }
+    }
     VkImageView SwapChain::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
         // No viewInfo.components since VK_COMPONENT_SWIZZLE_IDENTITY is defined as 0
         VkImageViewCreateInfo viewInfo{};
@@ -227,5 +233,6 @@ namespace Engine {
 
         return imageView;
     }
+    
 }
 

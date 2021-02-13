@@ -34,6 +34,8 @@ namespace Engine {
         VkExtent2D* getSwapChainExtent();
         std::vector<VkImageView>* getSwapChainImageViews();
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
+        void createImageViews();
+        void destroyImageViews();
 
     private:
         bool isSwapChainTemp;
@@ -46,7 +48,6 @@ namespace Engine {
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
         VkDevice* logicalDevice;
-        void createImageViews();
         mainProgram** mainProg;
         VkPhysicalDevice* physicalDevice;
     };

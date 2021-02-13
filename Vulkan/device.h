@@ -20,6 +20,7 @@ namespace Engine {
 		VkPhysicalDevice* getPhysicalDevice();
 		VkDevice* getLogicalDevice();
 		VkQueue* getGraphicsQueue();
+		VkQueue* getPresentQueue();
 		
 	private:
 		//VkPhysicalDevice* physicalDevice;

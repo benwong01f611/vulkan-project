@@ -240,3 +240,8 @@ VkQueue* Engine::Device::getGraphicsQueue()
 {
     return &graphicsQueue;
 }
+
+VkQueue* Engine::Device::getPresentQueue()
+{
+    return &presentQueue;
+}

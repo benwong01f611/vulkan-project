@@ -13,13 +13,7 @@ Engine::Image::Image(mainProgram** mainProgramPtr)
 
 Engine::Image::~Image()
 {
-    vkDestroyImageView(*logicalDevice, colorImageView, nullptr);
-    vkDestroyImage(*logicalDevice, colorImage, nullptr);
-    vkFreeMemory(*logicalDevice, colorImageMemory, nullptr);
-
-    vkDestroyImageView(*logicalDevice, depthImageView, nullptr);
-    vkDestroyImage(*logicalDevice, depthImage, nullptr);
-    vkFreeMemory(*logicalDevice, depthImageMemory, nullptr);
+    cleanImages();
 
     vkDestroySampler(*logicalDevice, textureSampler, nullptr);
     vkDestroyImageView(*logicalDevice, textureImageView, nullptr);
@@ -387,6 +381,17 @@ void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
         1, &barrier);
 
     (*mainProg)->commandBuffer->endSingleTimeCommands(commandBuffer);
+}
+
+void Engine::Image::cleanImages()
+{
+    vkDestroyImageView(*logicalDevice, colorImageView, nullptr);
+    vkDestroyImage(*logicalDevice, colorImage, nullptr);
+    vkFreeMemory(*logicalDevice, colorImageMemory, nullptr);
+
+    vkDestroyImageView(*logicalDevice, depthImageView, nullptr);
+    vkDestroyImage(*logicalDevice, depthImage, nullptr);
+    vkFreeMemory(*logicalDevice, depthImageMemory, nullptr);
 }
 
 void Engine::Image::createDepthResources()

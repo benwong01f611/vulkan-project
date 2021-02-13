@@ -178,3 +178,8 @@ void Engine::CommandBuffer::createCommandBuffers()
         }
     }
 }
+
+std::vector<VkCommandBuffer>* Engine::CommandBuffer::getCommandBuffers()
+{
+    return &commandBuffers;
+}
