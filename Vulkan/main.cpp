@@ -20,6 +20,8 @@ Engine::mainProgram::~mainProgram()
 
 }
 
+Engine::KeyInput::keyboardKeys keys;
+
 void Engine::mainProgram::cleanupSwapChain() {
     image->cleanImages();
     delete frameBuffer;
@@ -37,7 +39,7 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
     memory = new Engine::Memory(mainProgramPtr);
     //buffer = new Engine::Buffer(mainProgramPtr);
     commandBuffer = new Engine::CommandBuffer(mainProgramPtr);
-    model = new Engine::Model(mainProgramPtr,keyInput);
+    model = new Engine::Model(mainProgramPtr,keys);
 
     window = new Engine::Window(mainProgramPtr,keyInput);
     debugger = new Engine::Debug(mainProgramPtr);
@@ -198,40 +200,38 @@ void Engine::mainProgram::recreateSwapChain()
 
 void Engine::mainProgram::keyHandler(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
-    std::cout << keyInput.keys.W.press << std::endl; // This works
-    auto test = &keyInput;
     if (action == 1 || action == 2) {
         switch (key) {
         case GLFW_KEY_W:
-            keyInput.keys.W.press = true;
+            keys.W.press = true;
             break;
         case GLFW_KEY_A:
-            keyInput.keys.A.press = true;
+            keys.A.press = true;
             break;
         case GLFW_KEY_S:
-            keyInput.keys.S.press = true;
+            keys.S.press = true;
             break;
         case GLFW_KEY_D:
-            keyInput.keys.D.press = true;
+            keys.D.press = true;
             break;
         case GLFW_KEY_G:
-            keyInput.keys.G.press = true;
+            keys.G.press = true;
             break;
         case GLFW_KEY_B:
-            keyInput.keys.B.press = true;
+            keys.B.press = true;
             break;
         case GLFW_KEY_T:
-            keyInput.keys.T.press = true;
+            keys.T.press = true;
             break;
         case GLFW_KEY_0:
-            keyInput.keys.zero.press = true;
+            keys.zero.press = true;
             break;
         case GLFW_KEY_KP_SUBTRACT:
-            keyInput.keys.subtract.press = true;
+            keys.subtract.press = true;
             //changeMSAA("-");
             break;
         case GLFW_KEY_KP_ADD:
-            keyInput.keys.add.press = true;
+            keys.add.press = true;
             //changeMSAA("+");
             break;
         }
@@ -239,34 +239,34 @@ void Engine::mainProgram::keyHandler(GLFWwindow* window, int key, int scancode, 
     else {
         switch (key) {
         case GLFW_KEY_W:
-            keyInput.keys.W.press = false;
+            keys.W.press = false;
             break;
         case GLFW_KEY_A:
-            keyInput.keys.A.press = false;
+            keys.A.press = false;
             break;
         case GLFW_KEY_S:
-            keyInput.keys.S.press = false;
+            keys.S.press = false;
             break;
         case GLFW_KEY_D:
-            keyInput.keys.D.press = false;
+            keys.D.press = false;
             break;
         case GLFW_KEY_G:
-            keyInput.keys.G.press = false;
+            keys.G.press = false;
             break;
         case GLFW_KEY_B:
-            keyInput.keys.B.press = false;
+            keys.B.press = false;
             break;
         case GLFW_KEY_T:
-            keyInput.keys.T.press = false;
+            keys.T.press = false;
             break;
         case GLFW_KEY_0:
-            keyInput.keys.zero.press = false;
+            keys.zero.press = false;
             break;
         case GLFW_KEY_KP_SUBTRACT:
-            keyInput.keys.subtract.press = false;
+            keys.subtract.press = false;
             break;
         case GLFW_KEY_KP_ADD:
-            keyInput.keys.add.press = false;
+            keys.add.press = false;
             break;
         }
     }

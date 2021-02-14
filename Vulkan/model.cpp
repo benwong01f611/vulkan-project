@@ -5,7 +5,7 @@
 #include <tiny_obj_loader.h>
 #include <chrono>
 
-Engine::Model::Model(mainProgram** mainProgramPtr,KeyInput& keyInputref) : keyInput(keyInputref)
+Engine::Model::Model(mainProgram** mainProgramPtr,KeyInput::keyboardKeys& keysref) : keys(keysref)
 {
 	mainProg = mainProgramPtr;
 }
@@ -213,7 +213,6 @@ Engine::Model::~Model() {
 }
 
 void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
-    std::cout << keyInput.keys.W.press << "\t" << (*mainProg)->keyInput.keys.W.press << std::endl;
     // Calculate time
     // Static can preserve the variable value (init once only), so calling the function next time will have the original value
     static auto startTime = std::chrono::high_resolution_clock::now();
@@ -221,29 +220,29 @@ void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
     float time = std::chrono::duration<float, std::chrono::seconds::period>(currentTime - startTime).count();
     time = 0.0f;
     // On key press test
-    if (keyInput.keys.W.press) {
+    if (keys.W.press) {
         viewCoor[0] += 0.01f;
     }
-    if (keyInput.keys.A.press) {
+    if (keys.A.press) {
         viewCoor[1] += 0.01f;
     }
-    if (keyInput.keys.S.press) {
+    if (keys.S.press) {
         viewCoor[0] -= 0.01f;
     }
-    if (keyInput.keys.D.press) {
+    if (keys.D.press) {
         viewCoor[1] -= 0.01f;
     }
-    if (keyInput.keys.G.press) {
+    if (keys.G.press) {
         viewCoor[2] += 0.01f;
     }
-    if (keyInput.keys.B.press) {
+    if (keys.B.press) {
         viewCoor[2] -= 0.01f;
     }
-    if (keyInput.keys.T.press) {
+    if (keys.T.press) {
         for (int temp = 0; temp < 3; temp++)
             viewCoor[temp] = 2.0f;
     }
-    if (keyInput.keys.zero.press) {
+    if (keys.zero.press) {
         for (int temp = 0; temp < 3; temp++)
             viewCoor[temp] = 0.0f;
     }

@@ -88,7 +88,7 @@ namespace Engine {
             }
         };
 
-        Model(mainProgram** mainProgramPtr,KeyInput& keyInputref);
+        Model(mainProgram** mainProgramPtr,KeyInput::keyboardKeys& keysref);
         ~Model();
         void loadModel();
         bool hasStencilComponent(VkFormat format);
@@ -122,7 +122,7 @@ namespace Engine {
         std::vector<VkBuffer> uniformBuffers;
         std::vector<VkDeviceMemory> uniformBuffersMemory;
 
-        KeyInput& keyInput;
+        KeyInput::keyboardKeys& keys;
         float viewCoor[3] = { 2.0f, 2.0f, 2.0f };
     };
 }
