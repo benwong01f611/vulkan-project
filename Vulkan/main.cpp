@@ -25,7 +25,7 @@ Engine::KeyInput::keyboardKeys keys;
 void Engine::mainProgram::cleanupSwapChain() {
     image->cleanImages();
     delete frameBuffer;
-    delete commandBuffer;
+    commandBuffer->destroyCommandBuffers();
     delete pipeline;
     delete renderPass;
     model->destroyUniformBuffer();
@@ -121,8 +121,8 @@ void Engine::mainProgram::drawFrame() {
     submitInfo.pWaitDstStageMask = waitStages;
     submitInfo.commandBufferCount = 1;
     // Which command buffers to submit
-    
-    submitInfo.pCommandBuffers = &(*commandBuffer->getCommandBuffers())[imageIndex];
+    std::vector<VkCommandBuffer>& commandBuffers = *commandBuffer->getCommandBuffers();
+    submitInfo.pCommandBuffers = &commandBuffers[imageIndex];
     std::vector<VkSemaphore>& renderFinishedSemaphores = semaphores->getRenderFinishedSemaphores();
     VkSemaphore signalSemaphores[] = { renderFinishedSemaphores[currentFrame] };
     submitInfo.signalSemaphoreCount = 1;
@@ -194,7 +194,7 @@ void Engine::mainProgram::recreateSwapChain()
     model->createUniformBuffers();
     descriptorPool = new DescriptorPool(mainProgramPtr);
     descriptorSet->createDescriptorSets();
-    commandBuffer = new CommandBuffer(mainProgramPtr);
+    commandBuffer->createCommandBuffers();
 
 }
 

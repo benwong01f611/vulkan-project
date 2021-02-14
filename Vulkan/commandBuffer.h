@@ -14,6 +14,7 @@ namespace Engine {
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
 		void createCommandBuffers();
 		std::vector<VkCommandBuffer>* getCommandBuffers();
+		void destroyCommandBuffers();
 	private:
 		mainProgram** mainProg;
 		std::vector<VkCommandBuffer> commandBuffers; // Command buffers

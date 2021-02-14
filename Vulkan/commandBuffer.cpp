@@ -6,9 +6,7 @@ Engine::CommandBuffer::CommandBuffer(mainProgram** mainProgramPtr)
 }
 
 Engine::CommandBuffer::~CommandBuffer() {
-    // Recreating command buffers is wasteful (?), which can reuse existing pool to allocate new command buffers
-        // Like destroying the object requires time to recreate, so free up the content is much more efficient than destroying the object
-    vkFreeCommandBuffers(*(*mainProg)->device->getLogicalDevice(), *(*mainProg)->commandPool->getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    destroyCommandBuffers();
 }
 
 VkCommandBuffer Engine::CommandBuffer::beginSingleTimeCommands()
@@ -182,4 +180,11 @@ void Engine::CommandBuffer::createCommandBuffers()
 std::vector<VkCommandBuffer>* Engine::CommandBuffer::getCommandBuffers()
 {
     return &commandBuffers;
+}
+
+void Engine::CommandBuffer::destroyCommandBuffers()
+{
+    // Recreating command buffers is wasteful (?), which can reuse existing pool to allocate new command buffers
+    // Like destroying the object requires time to recreate, so free up the content is much more efficient than destroying the object
+    vkFreeCommandBuffers(*(*mainProg)->device->getLogicalDevice(), *(*mainProg)->commandPool->getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 }
