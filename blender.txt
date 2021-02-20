@@ -1,0 +1,9 @@
+G		-->Move
+B		-->Box Selection
+Ctrl+R	-->Loop Cut
+Z		-->Change View (Wireframe, solid)
+A		-->Select/Deselect all
+N		-->Property panel
+
+No face--> Use mask instead
+search human body for background

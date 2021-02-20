@@ -1,0 +1,64 @@
+1. Create instance and pick physical device
+	Starts application by VkInstance
+	Instance is created by descripting application and API extensions will be used
+	Query for physical device with VkPhysicalDevice, can query properties liek VRAM and device capabilities to select device
+	
+2. Logical device and queue families
+	Create VkDevice for specifying VkPhysicalDeviceFeatures will be using
+	Specify queue families would used
+	Vulkan operations are submitted to queuefamilies for execution
+	
+3. Window surface and swap chain
+	VkSurfaceKHR
+		Need to create window surface to present images with GLFW or SDL
+	VkSwapchainKHR
+		Swap chain is a collection of render targets
+		Ensure image which currently rendering to is different from one that displayed
+		
+4. Image views and framebuffers
+	VkImageView
+		References a specific part of image to be used
+	VkFramebuffer
+		References image views that are to be used for color, depth and stencil targets
+		
+5. Render passes
+	Describe the type of images that are used during rendering operations, how they will be used and how their contents should be treated
+	
+6. Graphic pipelines
+	VkPipeline
+		Describes configurable state of graphics card
+			Viewport size (window exclude title bar and margins)
+			Depth buffer opeation
+			Programmable state with VkShaderModule
+	VkShaderModule
+		Creaed from shader byte code
+		Driver needs to know which render targets will be used in the pipeline, specified by referencing render pass
+	Almost all configuration of graphics pipeline needs to be set in advance
+
+7. Command pools and command buffers
+	VkCommandBuffer
+		Operations to be executed need to be submitted to a queue, they are stored in command buffer
+		Allocated from command pool
+	VkCommandPool
+	Example
+		Begin the render pass
+		Bind the graphics pipeline
+		Draw 3 vertices
+		End the render pass
+
+8. Main loop
+	Acqiure an image from swap chain with vkAcquireNextImageKHR
+	Select appropriate command buffer for that image and execute with vkQueueSubmit
+	Return the image to swap chain for presentation with vkQueuePresentKHR
+
+Summary
+	Create VkInstance
+	Select device (VkPhysicalDevice)
+	Create VkDevice and VkQueue for drawing and presentation
+	Create window, window surface and swap chain
+	Wrap swap chain images to VkImageView
+	Create render apss that specifies render targets and usage
+	Create framebuffers for render pass
+	Setup graphics pipeline
+	Allocate and record a command buffer with the draw commands for every possible swap chain image
+	Draw frames by acquiring images, submitting the right draw command buffer and returning the images back to the swap chain
