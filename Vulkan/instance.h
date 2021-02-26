@@ -16,9 +16,8 @@ namespace Engine {
 			~Instance();
 			std::vector<const char*> getRequiredExtensions();
 			bool checkValidationLayerSupport();
-			VkInstance* getInstance();
+			VkInstance& getInstance();
 		private:
 			VkInstance instance;
-			mainProgram** mainProg;
 	};
 }

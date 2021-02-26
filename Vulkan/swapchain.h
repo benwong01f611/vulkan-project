@@ -24,15 +24,15 @@ namespace Engine {
     
     class SwapChain {
     public:
-        SwapChain(mainProgram** mainProgramPtr);
-        SwapChain(mainProgram** mainProgramPtr, bool isTemp);
+        SwapChain(Device& device, Surface& surface, Window& window);
+        SwapChain(bool isTemp);
         ~SwapChain();
-        SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device);
-        VkSwapchainKHR* getSwapChain();
-        std::vector<VkImage>* getSwapChainImages();
-        VkFormat* getSwapChainImageFormat();
-        VkExtent2D* getSwapChainExtent();
-        std::vector<VkImageView>* getSwapChainImageViews();
+        static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
+        VkSwapchainKHR& getSwapChain();
+        std::vector<VkImage>& getSwapChainImages();
+        VkFormat& getSwapChainImageFormat();
+        VkExtent2D& getSwapChainExtent();
+        std::vector<VkImageView>& getSwapChainImageViews();
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
         void createImageViews();
         void destroyImageViews();
@@ -47,8 +47,11 @@ namespace Engine {
         std::vector<VkImageView> swapChainImageViews; // Store image views
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
-        VkDevice* logicalDevice;
-        mainProgram** mainProg;
-        VkPhysicalDevice* physicalDevice;
+        VkDevice& logicalDevice;
+        VkPhysicalDevice& physicalDevice;
+        VkSurfaceKHR& surfaceKHR;
+        Surface& surface;
+        Device& device;
+        Window& window;
     };
 }

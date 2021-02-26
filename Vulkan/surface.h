@@ -11,11 +11,10 @@ namespace Engine {
 	public:
 		Surface(mainProgram** mainProgramPtr);
 		~Surface();
-		VkSurfaceKHR* getSurface();
+		VkSurfaceKHR& getSurface();
 		void initSurface();
 	private:
-		VkInstance* instance;
+		VkInstance& instance;
 		VkSurfaceKHR surface;
-		mainProgram** mainProg;
 	};
 }

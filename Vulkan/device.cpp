@@ -28,13 +28,13 @@ void Engine::Device::pickPhysicalDevice()
     // Number of device
     uint32_t deviceCount = 0;
     // Find the number of devices (GPU) available on host computer
-    vkEnumeratePhysicalDevices(*instance, &deviceCount, nullptr);
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, nullptr);
     // If no device supports vulkan, throw an exception
     if (deviceCount == 0) throw std::runtime_error("Failed to find a GPU with Vulkan support.");
     // Create an vector to hold all available devices
     std::vector<VkPhysicalDevice> devices(deviceCount);
     // Store the devices to the vector
-    vkEnumeratePhysicalDevices(*instance, &deviceCount, devices.data());
+    vkEnumeratePhysicalDevices(vkInstance, &deviceCount, devices.data());
     // If the device is suitable for using, select it
     for (const auto& device : devices) {
         if (isDeviceSuitable(device)) {
@@ -50,13 +50,8 @@ void Engine::Device::pickPhysicalDevice()
         throw std::runtime_error("Failed to find a suitable GPU!");
     }
 }
-Engine::Device::Device(mainProgram** mainProgramPtr)
+Engine::Device::Device(Instance& instanceRef, Surface& surfaceRef, Debug& debuggerRef) : instance(instanceRef), surface(surfaceRef), vkInstance(instance.getInstance()), surfaceKHR(surface.getSurface()), debugger(debuggerRef)
 {
-    mainProg = mainProgramPtr;
-    instance = (*mainProg)->instance->getInstance();
-    surface = (*mainProg)->surface->getSurface();
-
-
     pickPhysicalDevice();
     // This index is the physical device's queue index
     QueueFamilyIndices indices = findQueueFamilies(physicalDevice);
@@ -99,7 +94,7 @@ Engine::Device::Device(mainProgram** mainProgramPtr)
     createInfo.ppEnabledExtensionNames = deviceExtensions.data();
 
     // If validation layers are enabled, layers will be set
-    if ((*mainProg)->debugger->enableValidationLayers) {
+    if (debugger.enableValidationLayers) {
         createInfo.enabledLayerCount = static_cast<uint32_t>((*mainProg)->debugger->validationLayers.size());
         createInfo.ppEnabledLayerNames = (*mainProg)->debugger->validationLayers.data();
     }
@@ -139,9 +134,7 @@ bool Engine::Device::isDeviceSuitable(VkPhysicalDevice device)
     // Verify swap chain is adequate (sufficient)
     bool swapChainAdequate = false;
     if (extensionsSupported) {
-        SwapChain* tempSwapChain = new SwapChain(mainProg, true);
-        SwapChainSupportDetails swapChainSupport = tempSwapChain->querySwapChainSupport(device);
-        delete tempSwapChain;
+        SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device,surfaceKHR);
         // If the swapChainSupport formats and presentModes are NOT empty, swapChainAdequate will be true
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }

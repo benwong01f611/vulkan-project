@@ -41,11 +41,11 @@ void Engine::mainProgram::init(mainProgram** mainProgPtr) {
     commandBuffer = new Engine::CommandBuffer(mainProgramPtr);
     model = new Engine::Model(mainProgramPtr,keys);
 
-    window = new Engine::Window(mainProgramPtr,keyInput);
+    window = new Engine::Window(keyInput,framebufferResized);
     debugger = new Engine::Debug(mainProgramPtr);
     instance = new Engine::Instance(mainProgramPtr);
     surface = new Engine::Surface(mainProgramPtr);
-    device = new Engine::Device(mainProgramPtr);
+    device = new Engine::Device(instance, surface, debugger);
     swapchain = new Engine::SwapChain(mainProgramPtr);
     renderPass = new Engine::RenderPass(mainProgramPtr);
     descriptorSet = new Engine::DescriptorSet(mainProgramPtr);
@@ -73,7 +73,7 @@ void Engine::mainProgram::mainLoop() {
 	// When the window is closed, glfwWindowShouldClose(window) will turn true and breaks the loop
 	// But the drawing and presentation operations may still going on
 	// vkDeviceWaitIdle will wait for the operations to finish first before destroying the window
-	vkDeviceWaitIdle(*device->getLogicalDevice());
+	vkDeviceWaitIdle(device->getLogicalDevice());
 }
 
 void Engine::mainProgram::drawFrame() {
@@ -81,13 +81,13 @@ void Engine::mainProgram::drawFrame() {
     // VK_TRUE means waiting for all fences
     // UINT64_MAX for disabling timeout
     std::vector<VkFence>& inFlightFences = semaphores->getInFlightFences();
-    vkWaitForFences(*device->getLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
+    vkWaitForFences(device->getLogicalDevice(), 1, &inFlightFences[currentFrame], VK_TRUE, UINT64_MAX);
 
     uint32_t imageIndex;
 
     // Acquire next image index from swapchain to imageIndex, refers to the VkImage in swapChainImages, disables timeout with UINT64_MAX
     std::vector<VkSemaphore>& imageAvailableSemaphores = semaphores->getImageAvailableSemaphores();
-    VkResult result = vkAcquireNextImageKHR(*device->getLogicalDevice(), *swapchain->getSwapChain(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
+    VkResult result = vkAcquireNextImageKHR(device->getLogicalDevice(), swapchain->getSwapChain(), UINT64_MAX, imageAvailableSemaphores[currentFrame], VK_NULL_HANDLE, &imageIndex);
 
     // If the returned result is out of date (which means the swap chain is incompatible with surface and no longer be used for rendering, recreate swap chain and end this function
     if (result == VK_ERROR_OUT_OF_DATE_KHR) {
@@ -101,7 +101,7 @@ void Engine::mainProgram::drawFrame() {
     std::vector<VkFence>& imagesInFlight = semaphores->getImagesInFlight();
     // Wait if it has images in flight (using this image)
     if (imagesInFlight[imageIndex] != VK_NULL_HANDLE) {
-        vkWaitForFences(*device->getLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
+        vkWaitForFences(device->getLogicalDevice(), 1, &imagesInFlight[imageIndex], VK_TRUE, UINT64_MAX);
     }
     // Mark the image as now being in use by this frame
     imagesInFlight[imageIndex] = inFlightFences[currentFrame];
@@ -130,10 +130,10 @@ void Engine::mainProgram::drawFrame() {
     submitInfo.pSignalSemaphores = signalSemaphores;
 
     // We need to manually reset the fence to the unsignaled state
-    vkResetFences(*device->getLogicalDevice(), 1, &inFlightFences[currentFrame]);
+    vkResetFences(device->getLogicalDevice(), 1, &inFlightFences[currentFrame]);
 
     // Submit the queue, also receives the signal of finished a frame
-    VkQueue& graphicsQueue = *device->getGraphicsQueue();
+    VkQueue& graphicsQueue = device->getGraphicsQueue();
     if (vkQueueSubmit(graphicsQueue, 1, &submitInfo, inFlightFences[currentFrame]) != VK_SUCCESS) {
         throw std::runtime_error("failed to submit draw command buffer!");
     }
@@ -146,14 +146,14 @@ void Engine::mainProgram::drawFrame() {
     presentInfo.pWaitSemaphores = signalSemaphores;
 
     // Specify swapchains and the image
-    VkSwapchainKHR& swapChain = *swapchain->getSwapChain();
+    VkSwapchainKHR& swapChain = swapchain->getSwapChain();
     VkSwapchainKHR swapChains[] = { swapChain };
     presentInfo.swapchainCount = 1;
     presentInfo.pSwapchains = swapChains;
     presentInfo.pImageIndices = &imageIndex;
 
     // Submits the request to present an image to swap chain
-    VkQueue& presentQueue = *device->getPresentQueue();
+    VkQueue& presentQueue = device->getPresentQueue();
     result = vkQueuePresentKHR(presentQueue, &presentInfo);
     // The VK_ERROR_OUT_OF_DATE_KHR is not guaranteed to happen
     // If result is VK_ERROR_OUT_OF_DATE_KHR or VK_SUBOPTIMAL_KHR or the frame buffer is resized, recreate the swap chain
@@ -179,7 +179,7 @@ void Engine::mainProgram::recreateSwapChain()
         glfwWaitEvents();
     }
 
-    vkDeviceWaitIdle(*device->getLogicalDevice()); // Device could be in-use, wait for it to release
+    vkDeviceWaitIdle(device->getLogicalDevice()); // Device could be in-use, wait for it to release
 
     cleanupSwapChain(); // Cleanup the old swapchain
 

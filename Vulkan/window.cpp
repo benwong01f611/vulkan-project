@@ -3,8 +3,7 @@
 #include "keyInput.h"
 
 namespace Engine {
-	Window::Window(mainProgram** mainProgramPtr,KeyInput& keyInputref) : keyInput(keyInputref) {
-		mainProg = mainProgramPtr;
+	Window::Window(KeyInput& keyInputref, bool& fbResized) : keyInput(keyInputref), framebufferResized(fbResized) {
 		windowHeight = 600;
 		windowWidth = 800;
 		glfwInit(); // Initializes GLFW library
@@ -21,7 +20,6 @@ namespace Engine {
 		glfwSetFramebufferSizeCallback(window, framebufferResizeCallback);
 		glfwSetKeyCallback(window, KeyInput::keyCallback);
 
-		(*mainProg)->framebufferResized = false;
 	}
 	Window::~Window() {
 		glfwDestroyWindow(window); // Destroy the application window

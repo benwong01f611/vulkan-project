@@ -10,9 +10,8 @@ namespace Engine {
 		mainProgram** getParent();
 		VkFormat findDepthFormat();
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
-		VkRenderPass* getRenderPass();
+		VkRenderPass& getRenderPass();
 	private:
-		mainProgram** mainProg;
 		VkRenderPass renderPass;
 	};
 }

@@ -29,14 +29,13 @@ namespace Engine {
 		};;
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE; // Vulkan debug messenger
 	private:
-		VkInstance* instance;
+		VkInstance& instance;
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 			VkDebugUtilsMessageTypeFlagsEXT messageType,
 			const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
 			void* pUserData);
 		VkResult CreateDebugUtilsMessengerEXT(VkInstance vkinstance, const VkDebugUtilsMessengerCreateInfoEXT* pCreateInfo, const VkAllocationCallbacks* pAllocator, VkDebugUtilsMessengerEXT* pDebugMessenger);
-		mainProgram** mainProgPtr;
 
 	};
 }

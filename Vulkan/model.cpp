@@ -163,34 +163,34 @@ void Engine::Model::createUniformBuffers()
     }
 }
 
-std::vector<VkBuffer>* Engine::Model::getUniformBuffers()
+std::vector<VkBuffer>& Engine::Model::getUniformBuffers()
 {
-    return &uniformBuffers;
+    return uniformBuffers;
 }
 
-std::vector<VkDeviceMemory>* Engine::Model::getUniformBuffersMemory()
+std::vector<VkDeviceMemory>& Engine::Model::getUniformBuffersMemory()
 {
-    return &uniformBuffersMemory;
+    return uniformBuffersMemory;
 }
 
-VkBuffer* Engine::Model::getIndexBuffers()
+VkBuffer& Engine::Model::getIndexBuffers()
 {
-    return &indexBuffer;
+    return indexBuffer;
 }
 
-VkDeviceMemory* Engine::Model::getIndexBuffersMemory()
+VkDeviceMemory& Engine::Model::getIndexBuffersMemory()
 {
-    return &indexBufferMemory;
+    return indexBufferMemory;
 }
 
-VkBuffer* Engine::Model::getVertexBuffers()
+VkBuffer& Engine::Model::getVertexBuffers()
 {
-    return &vertexBuffer;
+    return vertexBuffer;
 }
 
-VkDeviceMemory* Engine::Model::getVertexBuffersMemory()
+VkDeviceMemory& Engine::Model::getVertexBuffersMemory()
 {
-    return &vertexBufferMemory;
+    return vertexBufferMemory;
 }
 
 void Engine::Model::destroyUniformBuffer()

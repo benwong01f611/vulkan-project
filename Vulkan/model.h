@@ -98,12 +98,12 @@ namespace Engine {
         void createIndexBuffer();
         void createUniformBuffers();
 
-        std::vector<VkBuffer>* getUniformBuffers();
-        std::vector<VkDeviceMemory>* getUniformBuffersMemory();
-        VkBuffer* getIndexBuffers();
-        VkDeviceMemory* getIndexBuffersMemory();
-        VkBuffer* getVertexBuffers();
-        VkDeviceMemory* getVertexBuffersMemory();
+        std::vector<VkBuffer>& getUniformBuffers();
+        std::vector<VkDeviceMemory>& getUniformBuffersMemory();
+        VkBuffer& getIndexBuffers();
+        VkDeviceMemory& getIndexBuffersMemory();
+        VkBuffer& getVertexBuffers();
+        VkDeviceMemory& getVertexBuffersMemory();
         void destroyUniformBuffer();
         std::string model_path = "obj/viking_room.obj";
 
@@ -114,7 +114,7 @@ namespace Engine {
     private:
         mainProgram** mainProg;
 
-        VkDevice* logicalDevice;
+        VkDevice& logicalDevice;
         VkBuffer vertexBuffer;
         VkDeviceMemory vertexBufferMemory;
         VkBuffer indexBuffer;

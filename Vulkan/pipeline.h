@@ -11,13 +11,13 @@ namespace Engine {
 	public:
 		Pipeline(mainProgram** mainProgramPtr);
 		~Pipeline();
-		VkPipeline* getGraphicsPipeline();
-		VkPipelineLayout* getPipelineLayout();
+		VkPipeline& getGraphicsPipeline();
+		VkPipelineLayout& getPipelineLayout();
 		static std::vector<char> readFile(const std::string& filename);
 		VkShaderModule createShaderModule(const std::vector<char>& code);
 	private:
 		VkPipelineLayout pipelineLayout; // Pipeline layout
 		VkPipeline graphicsPipeline;
-		VkDevice* logicalDevice;
+		VkDevice& logicalDevice;
 	};
 }

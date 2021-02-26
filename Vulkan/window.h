@@ -9,7 +9,7 @@ namespace Engine {
 	class KeyInput;
 	class Window {
 		public:
-			Window(mainProgram** mainProgramPtr,KeyInput& keyInputref);
+			Window(KeyInput& keyInputref, bool& fbResized);
 			~Window();
 
 			int windowWidth;
@@ -19,7 +19,7 @@ namespace Engine {
 			GLFWwindow** getWindow();
 		private:
 			GLFWwindow* window;
-			mainProgram** mainProg;
 			KeyInput& keyInput;
+			bool& framebufferResized;
 	};
 };

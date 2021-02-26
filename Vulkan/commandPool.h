@@ -8,8 +8,7 @@ namespace Engine {
 	public:
 		CommandPool(mainProgram** mainProgramPtr);
 		~CommandPool();
-		mainProgram** mainProg;
-		VkCommandPool* getCommandPool();
+		VkCommandPool& getCommandPool();
 	private:
 		VkCommandPool commandPool;
 	};

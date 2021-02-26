@@ -8,7 +8,6 @@ VkSurfaceKHR surface;*/
 
 namespace Engine {
 	Surface::Surface(mainProgram** mainProgramPtr) {
-		mainProg = mainProgramPtr;
 		instance = (*mainProg)->instance->getInstance();
 		// Create window surface with glfwCreateWindowSurface
 		if (glfwCreateWindowSurface(*(*mainProg)->instance->getInstance(), *(*mainProg)->window->getWindow(), nullptr, &surface) != VK_SUCCESS) {
@@ -16,12 +15,12 @@ namespace Engine {
 		}
 	}
 	Surface::~Surface() {
-		vkDestroySurfaceKHR(*instance, surface, nullptr);
+		vkDestroySurfaceKHR(instance, surface, nullptr);
 	}
 
-	VkSurfaceKHR* Surface::getSurface()
+	VkSurfaceKHR& Surface::getSurface()
 	{
-		return &surface;
+		return surface;
 	}
 	void Surface::initSurface()
 	{
