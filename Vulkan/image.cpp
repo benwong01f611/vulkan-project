@@ -3,10 +3,8 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
-Engine::Image::Image(mainProgram** mainProgramPtr)
+Engine::Image::Image(Device& deviceRef, SwapChain& swapChainRef, Model& modelRef, Memory& memoryRef, CommandBuffer& commandBufferRef) : device(deviceRef), swapChain(swapChainRef), logicalDevice(device.getLogicalDevice()), model(modelRef), memory(memoryRef), commandBuffer(commandBufferRef)
 {
-	mainProg = mainProgramPtr;
-    logicalDevice = (*mainProg)->device->getLogicalDevice();
     createColorResources();
     createDepthResources();
 }
@@ -15,19 +13,19 @@ Engine::Image::~Image()
 {
     cleanImages();
 
-    vkDestroySampler(*logicalDevice, textureSampler, nullptr);
-    vkDestroyImageView(*logicalDevice, textureImageView, nullptr);
+    vkDestroySampler(logicalDevice, textureSampler, nullptr);
+    vkDestroyImageView(logicalDevice, textureImageView, nullptr);
 
-    vkDestroyImage(*logicalDevice, textureImage, nullptr);
-    vkFreeMemory(*logicalDevice, textureImageMemory, nullptr);
+    vkDestroyImage(logicalDevice, textureImage, nullptr);
+    vkFreeMemory(logicalDevice, textureImageMemory, nullptr);
 }
 
 void Engine::Image::createColorResources()
 {
-	VkFormat colorFormat = *(*mainProg)->swapchain->getSwapChainImageFormat();
-	VkExtent2D swapChainExtent = *(*mainProg)->swapchain->getSwapChainExtent();
-	VkSampleCountFlagBits msaaSamples = *((*mainProg)->device->getMSAASamples(false));
-	createImage(swapChainExtent.width, swapChainExtent.height, 1, *((*mainProg)->device->getMSAASamples(false)), colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
+	VkFormat colorFormat = swapChain.getSwapChainImageFormat();
+	VkExtent2D swapChainExtent = swapChain.getSwapChainExtent();
+	VkSampleCountFlagBits msaaSamples = device.getMSAASamples(false);
+	createImage(swapChainExtent.width, swapChainExtent.height, 1, device.getMSAASamples(false), colorFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_TRANSIENT_ATTACHMENT_BIT | VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, colorImage, colorImageMemory);
 	colorImageView = createImageView(colorImage, colorFormat, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 }
 
@@ -70,28 +68,28 @@ VkImage Engine::Image::createImage(uint32_t width, uint32_t height, uint32_t mip
     imageInfo.flags = 0; // Optional
 
     // Create image
-    if (vkCreateImage(*logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS) {
+    if (vkCreateImage(logicalDevice, &imageInfo, nullptr, &image) != VK_SUCCESS) {
         throw std::runtime_error("failed to create image!");
     }
 
     VkMemoryRequirements memRequirements;
-    vkGetImageMemoryRequirements(*logicalDevice, image, &memRequirements);
+    vkGetImageMemoryRequirements(logicalDevice, image, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = (*mainProg)->memory->findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = memory.findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(*logicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &imageMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate image memory!");
     }
 
-    vkBindImageMemory(*logicalDevice, image, imageMemory, 0);
+    vkBindImageMemory(logicalDevice, image, imageMemory, 0);
 }
 
-VkImageView* Engine::Image::getColorImageView()
+VkImageView& Engine::Image::getColorImageView()
 {
-	return &colorImageView;
+	return colorImageView;
 }
 
 VkImageView Engine::Image::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels)
@@ -109,46 +107,46 @@ VkImageView Engine::Image::createImageView(VkImage image, VkFormat format, VkIma
     viewInfo.subresourceRange.layerCount = 1;
 
     VkImageView imageView;
-    if (vkCreateImageView(*logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+    if (vkCreateImageView(logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture image view!");
     }
 
     return imageView;
 }
 
-VkImage* Engine::Image::getColorImage()
+VkImage& Engine::Image::getColorImage()
 {
-    return &colorImage;
+    return colorImage;
 }
 
-VkDeviceMemory* Engine::Image::getColorImageMemory()
+VkDeviceMemory& Engine::Image::getColorImageMemory()
 {
-    return &colorImageMemory;
+    return colorImageMemory;
 }
 
-VkImage* Engine::Image::getDepthImage()
+VkImage& Engine::Image::getDepthImage()
 {
-    return &depthImage;
+    return depthImage;
 }
 
-VkImageView* Engine::Image::getDepthImageView()
+VkImageView& Engine::Image::getDepthImageView()
 {
-    return &depthImageView;
+    return depthImageView;
 }
 
-VkDeviceMemory* Engine::Image::getDepthImageMemory()
+VkDeviceMemory& Engine::Image::getDepthImageMemory()
 {
-    return &depthImageMemory;
+    return depthImageMemory;
 }
 
-VkImageView* Engine::Image::getTextureImageView()
+VkImageView& Engine::Image::getTextureImageView()
 {
-    return &textureImageView;
+    return textureImageView;
 }
 
-VkSampler* Engine::Image::getTextureSampler()
+VkSampler& Engine::Image::getTextureSampler()
 {
-    return &textureSampler;
+    return textureSampler;
 }
 
 void Engine::Image::createTexture()
@@ -173,15 +171,14 @@ void Engine::Image::createTexture()
     VkBuffer stagingBuffer;
     VkDeviceMemory stagingBufferMemory;
 
-    (*mainProg)->model->createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
+    model.createBuffer(imageSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
-    VkDevice* device = (*mainProg)->device->getLogicalDevice();
 
     // Copy the image data from stb to buffer
     void* data;
-    vkMapMemory(*device, stagingBufferMemory, 0, imageSize, 0, &data);
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, imageSize, 0, &data);
     memcpy(data, pixels, static_cast<size_t>(imageSize));
-    vkUnmapMemory(*device, stagingBufferMemory);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     // Cleanup
     stbi_image_free(pixels);
@@ -191,14 +188,14 @@ void Engine::Image::createTexture()
 
     // Transit the image
     transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, mipLevels);
-    (*mainProg)->commandBuffer->copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
+    commandBuffer.copyBufferToImage(stagingBuffer, textureImage, static_cast<uint32_t>(texWidth), static_cast<uint32_t>(texHeight));
     // We need this to start sampling to prepare for shader access
     //transitionImageLayout(textureImage, VK_FORMAT_R8G8B8A8_SRGB, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL, mipLevels);
 
     generateMipmaps(textureImage, VK_FORMAT_R8G8B8A8_SRGB, texWidth, texHeight, mipLevels);
 
-    vkDestroyBuffer(*device, stagingBuffer, nullptr);
-    vkFreeMemory(*device, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 
 
     // createTextureImageView
@@ -236,14 +233,14 @@ void Engine::Image::createTexture()
     samplerInfo.minLod = 0;
     samplerInfo.maxLod = static_cast<float>(mipLevels);
 
-    if (vkCreateSampler(*(*mainProg)->device->getLogicalDevice(), &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
+    if (vkCreateSampler(logicalDevice, &samplerInfo, nullptr, &textureSampler) != VK_SUCCESS) {
         throw std::runtime_error("failed to create texture sampler!");
     }
 }
 
 void Engine::Image::transitionImageLayout(VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout, uint32_t mipLevels)
 {
-    VkCommandBuffer commandBuffer = (*mainProg)->commandBuffer->beginSingleTimeCommands();
+    VkCommandBuffer commandBufferLocal = commandBuffer.beginSingleTimeCommands();
 
     // To perform layout transition, use image memory barrier
     VkImageMemoryBarrier barrier{};
@@ -287,7 +284,7 @@ void Engine::Image::transitionImageLayout(VkImage image, VkFormat format, VkImag
     }
 
     vkCmdPipelineBarrier(
-        commandBuffer,
+        commandBufferLocal,
         sourceStage, destinationStage,
         0,
         0, nullptr,
@@ -295,17 +292,17 @@ void Engine::Image::transitionImageLayout(VkImage image, VkFormat format, VkImag
         1, &barrier
     );
 
-    (*mainProg)->commandBuffer->endSingleTimeCommands(commandBuffer);
+    commandBuffer.endSingleTimeCommands(commandBufferLocal);
 }
 
 void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels)
 {
     VkFormatProperties formatProperties;
-    vkGetPhysicalDeviceFormatProperties(*(*mainProg)->device->getPhysicalDevice(), imageFormat, &formatProperties);
+    vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), imageFormat, &formatProperties);
     if (!(formatProperties.optimalTilingFeatures & VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT))
         throw std::runtime_error("texture image format does not support linear blitting!");
 
-    VkCommandBuffer commandBuffer = (*mainProg)->commandBuffer->beginSingleTimeCommands();
+    VkCommandBuffer commandBufferLocal = commandBuffer.beginSingleTimeCommands();
 
     VkImageMemoryBarrier barrier{};
     barrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
@@ -327,7 +324,7 @@ void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
         barrier.dstAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
 
-        vkCmdPipelineBarrier(commandBuffer,
+        vkCmdPipelineBarrier(commandBufferLocal,
             VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_TRANSFER_BIT, 0,
             0, nullptr,
             0, nullptr,
@@ -347,7 +344,7 @@ void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
         blit.dstSubresource.baseArrayLayer = 0;
         blit.dstSubresource.layerCount = 1;
 
-        vkCmdBlitImage(commandBuffer,
+        vkCmdBlitImage(commandBufferLocal,
             image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
             image, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
             1, &blit,
@@ -358,7 +355,7 @@ void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
         barrier.srcAccessMask = VK_ACCESS_TRANSFER_READ_BIT;
         barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-        vkCmdPipelineBarrier(commandBuffer,
+        vkCmdPipelineBarrier(commandBufferLocal,
             VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
             0, nullptr,
             0, nullptr,
@@ -374,31 +371,31 @@ void Engine::Image::generateMipmaps(VkImage image, VkFormat imageFormat, int32_t
     barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
     barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
 
-    vkCmdPipelineBarrier(commandBuffer,
+    vkCmdPipelineBarrier(commandBufferLocal,
         VK_PIPELINE_STAGE_TRANSFER_BIT, VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT, 0,
         0, nullptr,
         0, nullptr,
         1, &barrier);
 
-    (*mainProg)->commandBuffer->endSingleTimeCommands(commandBuffer);
+    commandBuffer.endSingleTimeCommands(commandBufferLocal);
 }
 
 void Engine::Image::cleanImages()
 {
-    vkDestroyImageView(*logicalDevice, colorImageView, nullptr);
-    vkDestroyImage(*logicalDevice, colorImage, nullptr);
-    vkFreeMemory(*logicalDevice, colorImageMemory, nullptr);
+    vkDestroyImageView(logicalDevice, colorImageView, nullptr);
+    vkDestroyImage(logicalDevice, colorImage, nullptr);
+    vkFreeMemory(logicalDevice, colorImageMemory, nullptr);
 
-    vkDestroyImageView(*logicalDevice, depthImageView, nullptr);
-    vkDestroyImage(*logicalDevice, depthImage, nullptr);
-    vkFreeMemory(*logicalDevice, depthImageMemory, nullptr);
+    vkDestroyImageView(logicalDevice, depthImageView, nullptr);
+    vkDestroyImage(logicalDevice, depthImage, nullptr);
+    vkFreeMemory(logicalDevice, depthImageMemory, nullptr);
 }
 
 void Engine::Image::createDepthResources()
 {
     VkFormat depthFormat = findDepthFormat();
-    VkExtent2D swapChainExtent = *(*mainProg)->swapchain->getSwapChainExtent();
-    VkSampleCountFlagBits msaaSamples = *((*mainProg)->device->getMSAASamples(false));
+    VkExtent2D swapChainExtent = swapChain.getSwapChainExtent();
+    VkSampleCountFlagBits msaaSamples = device.getMSAASamples(false);
     createImage(swapChainExtent.width, swapChainExtent.height, 1, msaaSamples, depthFormat, VK_IMAGE_TILING_OPTIMAL, VK_IMAGE_USAGE_DEPTH_STENCIL_ATTACHMENT_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, depthImage, depthImageMemory);
     depthImageView = createImageView(depthImage, depthFormat, VK_IMAGE_ASPECT_DEPTH_BIT, 1);
     //transitionImageLayout(depthImage, depthFormat, VK_IMAGE_LAYOUT_UNDEFINED, VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL);
@@ -422,7 +419,7 @@ VkFormat Engine::Image::findSupportedFormat(const std::vector<VkFormat>& candida
         // bufferFeatures : Use cases that are supported for buffers
 
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(*(*mainProg)->device->getPhysicalDevice(), format, &props);
+        vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), format, &props);
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
             return format;
         }

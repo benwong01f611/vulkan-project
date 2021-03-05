@@ -22,6 +22,11 @@
 namespace Engine {
     class mainProgram;
     class KeyInput;
+    class Device;
+    class SwapChain;
+    class Debug;
+    class CommandBuffer;
+    class Memory;
     class Model {
     public:
         struct UniformBufferObject {
@@ -88,7 +93,7 @@ namespace Engine {
             }
         };
 
-        Model(mainProgram** mainProgramPtr,KeyInput::keyboardKeys& keysref);
+        Model(Device& deviceRef, SwapChain& swapChainRef, Debug& debuggerRef, CommandBuffer& commandBufferRef, Memory& memoryRef, KeyInput::keyboardKeys& keysref);
         ~Model();
         void loadModel();
         bool hasStencilComponent(VkFormat format);
@@ -112,7 +117,6 @@ namespace Engine {
 
         void updateUniformBuffer(uint32_t currentImage);
     private:
-        mainProgram** mainProg;
 
         VkDevice& logicalDevice;
         VkBuffer vertexBuffer;
@@ -121,7 +125,11 @@ namespace Engine {
         VkDeviceMemory indexBufferMemory;
         std::vector<VkBuffer> uniformBuffers;
         std::vector<VkDeviceMemory> uniformBuffersMemory;
-
+        Device& device;
+        SwapChain& swapChain;
+        Debug& debugger;
+        CommandBuffer& commandBufferLocalRef;
+        Memory& memory;
         KeyInput::keyboardKeys& keys;
         float viewCoor[3] = { 2.0f, 2.0f, 2.0f };
     };

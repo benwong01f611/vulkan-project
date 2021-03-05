@@ -1,13 +1,12 @@
 #include "memory.h"
 
-Engine::Memory::Memory(mainProgram** mainProgramPtr)
+Engine::Memory::Memory(Device& deviceRef) : device(deviceRef)
 {
-    mainProg = mainProgramPtr;
 }
 
 uint32_t Engine::Memory::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
-    vkGetPhysicalDeviceMemoryProperties(*(*mainProg)->device->getPhysicalDevice(), &memProperties);
+    vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
 
     for (uint32_t i = 0; i < memProperties.memoryTypeCount; i++) {
         // If typeFilter = 1 and we can write to that memory

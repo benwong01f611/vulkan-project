@@ -7,10 +7,9 @@ GLFWwindow* window;
 VkSurfaceKHR surface;*/
 
 namespace Engine {
-	Surface::Surface(mainProgram** mainProgramPtr) {
-		instance = (*mainProg)->instance->getInstance();
+	Surface::Surface(Instance& instanceRef, Window& windowRef) : instance(instanceRef.getInstance()), window(windowRef.getWindow()) {
 		// Create window surface with glfwCreateWindowSurface
-		if (glfwCreateWindowSurface(*(*mainProg)->instance->getInstance(), *(*mainProg)->window->getWindow(), nullptr, &surface) != VK_SUCCESS) {
+		if (glfwCreateWindowSurface(instance, window, nullptr, &surface) != VK_SUCCESS) {
 			throw std::runtime_error("failed to create window surface!");
 		}
 	}

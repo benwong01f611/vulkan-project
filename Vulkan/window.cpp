@@ -31,9 +31,9 @@ namespace Engine {
 		app->framebufferResized = true;
 	}
 
-	GLFWwindow** Window::getWindow()
+	GLFWwindow*& Window::getWindow()
 	{
-		return &window;
+		return window;
 	}
 
 }

@@ -4,15 +4,24 @@
 #include "main.h"
 
 namespace Engine {
-	class mainProgram;
+	class Device;
+	class SwapChain;
+	class Image;
+	class Model;
+	class DescriptorPool;
 	class DescriptorSet {
 	public:
-		DescriptorSet(mainProgram** mainProgramPtr);
+		DescriptorSet(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, Model& modelRef, DescriptorPool& descriptorPoolRef);
 		VkDescriptorSetLayout& getDescriptorSetLayout();
 		std::vector<VkDescriptorSet>& getDescriptorSets();
 		void createDescriptorSets();
 	private:
 		VkDescriptorSetLayout descriptorSetLayout;
 		std::vector<VkDescriptorSet> descriptorSets;
+		SwapChain& swapChain;
+		Device& device;
+		Image& image;
+		Model& model;
+		DescriptorPool& descriptorPool;
 	};
 }

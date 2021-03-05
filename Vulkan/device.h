@@ -5,7 +5,9 @@
 #include "main.h"
 
 namespace Engine {
-	class mainProgram;
+	class Instance;
+	class Surface;
+	class Debug;
 	class Device {
 	public:
 		void pickPhysicalDevice();
@@ -34,6 +36,6 @@ namespace Engine {
 		VkSurfaceKHR& surfaceKHR;
 		Instance& instance;
 		Surface& surface;
-		Debug* debugger;
+		Debug& debugger;
 	};
 }

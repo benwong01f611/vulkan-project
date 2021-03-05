@@ -12,12 +12,10 @@ struct Engine::Device::QueueFamilyIndices {
     }
 };
 
-Engine::CommandPool::CommandPool(mainProgram** mainProgramPtr)
+Engine::CommandPool::CommandPool(Device& deviceRef) : device(deviceRef)
 {
-    mainProg = mainProgramPtr;
-    
     // Command buffers are executed by submitting them on one of the device queues
-    Engine::Device::QueueFamilyIndices queueFamilyIndices = (*mainProg)->device->findQueueFamilies(*(*mainProg)->device->getPhysicalDevice());
+    Engine::Device::QueueFamilyIndices queueFamilyIndices = device.findQueueFamilies(device.getPhysicalDevice());
 
     VkCommandPoolCreateInfo poolInfo = {};
     poolInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
@@ -26,15 +24,15 @@ Engine::CommandPool::CommandPool(mainProgram** mainProgramPtr)
     // VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT: Allow command buffers to be rerecorded individually, without this flag they all have to be reset together
     poolInfo.flags = 0; // Optional
     // Create command pool
-    if (vkCreateCommandPool(*(*mainProg)->device->getLogicalDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
+    if (vkCreateCommandPool(device.getLogicalDevice(), &poolInfo, nullptr, &commandPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create command pool!");
     }
 }
 
-VkCommandPool* Engine::CommandPool::getCommandPool()
+VkCommandPool& Engine::CommandPool::getCommandPool()
 {
-    return &commandPool;
+    return commandPool;
 }
 Engine::CommandPool::~CommandPool() {
-    vkDestroyCommandPool(*(*mainProg)->device->getLogicalDevice(), commandPool, nullptr);
+    vkDestroyCommandPool(device.getLogicalDevice(), commandPool, nullptr);
 }

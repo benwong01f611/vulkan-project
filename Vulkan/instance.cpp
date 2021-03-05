@@ -2,11 +2,9 @@
 #include "debug.h"
 
 namespace Engine {
-    Instance::Instance(mainProgram** mainProgramPtr) {
-        mainProg = mainProgramPtr;
+    Instance::Instance(Debug& debuggerRef) : debugger(debuggerRef) {
         // If validation layers are enabled but the requested validation layers are not available, throw an exception
-        std::cout<<(*mainProg)->debugger->enableValidationLayers<<std::endl;
-        if ((*mainProg)->debugger->enableValidationLayers && !checkValidationLayerSupport()) {
+        if (debugger.enableValidationLayers && !checkValidationLayerSupport()) {
             throw std::runtime_error("validation layers requested, but not available!");
         }
 
@@ -55,9 +53,9 @@ namespace Engine {
 
         // If validation layers are enabled, instance create info will have the numbers of enabled layers
         VkDebugUtilsMessengerCreateInfoEXT debugCreateInfo;
-        if ((*mainProg)->debugger->enableValidationLayers) {
-            createInfo.enabledLayerCount = static_cast<uint32_t>((*mainProg)->debugger->validationLayers.size());
-            createInfo.ppEnabledLayerNames = (*mainProg)->debugger->validationLayers.data();
+        if (debugger.enableValidationLayers) {
+            createInfo.enabledLayerCount = static_cast<uint32_t>(debugger.validationLayers.size());
+            createInfo.ppEnabledLayerNames = debugger.validationLayers.data();
 
             Debug::populateDebugMessengerCreateInfo(debugCreateInfo);
             createInfo.pNext = (VkDebugUtilsMessengerCreateInfoEXT*)&debugCreateInfo;
@@ -88,7 +86,7 @@ namespace Engine {
 
         std::vector<const char*> extensions(glfwExtensions, glfwExtensions + glfwExtensionCount);
 
-        if ((*mainProg)->debugger->enableValidationLayers) {
+        if (debugger.enableValidationLayers) {
             extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
         }
 
@@ -106,7 +104,7 @@ namespace Engine {
         // Store all available layers to the vector availableLayers by enumerating
         vkEnumerateInstanceLayerProperties(&layerCount, availableLayers.data());
         // Check if all layers in validationLayers exist in availableLayers
-        for (const char* layerName : (*mainProg)->debugger->validationLayers) {
+        for (const char* layerName : (debugger.validationLayers)) {
             bool layerFound = false;
             // Loop through available layers, if the layer is found, break out the loop and search for the next layer
             for (const auto& layerProperties : availableLayers) {
@@ -122,9 +120,9 @@ namespace Engine {
         // If all required layers are found, return true
         return true;
     }
-    VkInstance* Instance::getInstance()
+    VkInstance& Instance::getInstance()
     {
-        return &instance;
+        return instance;
     }
 
 }

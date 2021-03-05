@@ -47,7 +47,6 @@ namespace Engine {
 	public:
 		mainProgram();
 		~mainProgram();
-		void init(mainProgram** mainProgPtr);
 		Window* window;
 		Instance* instance;
 		Debug* debugger;

@@ -1,6 +1,6 @@
 #include "renderpass.h"
 #include <array>
-Engine::RenderPass::RenderPass(mainProgram** mainProgramPtr)
+Engine::RenderPass::RenderPass(Device& deviceRef, SwapChain& swapchainRef) : device(deviceRef), swapChain(swapchainRef)
 {/* loadOp:
             VK_ATTACHMENT_LOAD_OP_LOAD: Preserve the existing contents of the attachment
             VK_ATTACHMENT_LOAD_OP_CLEAR: Clear the values to a constant at the start
@@ -9,9 +9,8 @@ Engine::RenderPass::RenderPass(mainProgram** mainProgramPtr)
             VK_ATTACHMENT_STORE_OP_STORE: Rendered contents will be stored in memory and can be read later
             VK_ATTACHMENT_STORE_OP_DONT_CARE: Contents of the framebuffer will be undefined after the rendering operation
         */
-    mainProg = mainProgramPtr;
-    VkSampleCountFlagBits msaaSamples = *((*mainProg)->device->getMSAASamples(false));
-    VkFormat swapChainImageFormat = *((*mainProg)->swapchain->getSwapChainImageFormat());
+    VkSampleCountFlagBits msaaSamples = device.getMSAASamples(false);
+    VkFormat swapChainImageFormat = swapChain.getSwapChainImageFormat();
     VkAttachmentDescription colorAttachment = {};
     colorAttachment.format = swapChainImageFormat;
     colorAttachment.samples = msaaSamples;
@@ -108,14 +107,14 @@ Engine::RenderPass::RenderPass(mainProgram** mainProgramPtr)
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
     
-    if (vkCreateRenderPass(*(*mainProg)->device->getLogicalDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
+    if (vkCreateRenderPass(device.getLogicalDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
 
 }
 Engine::RenderPass::~RenderPass()
 {
-    vkDestroyRenderPass(*(*mainProg)->device->getLogicalDevice(), renderPass, nullptr);
+    vkDestroyRenderPass(device.getLogicalDevice(), renderPass, nullptr);
 }
 VkFormat Engine::RenderPass::findDepthFormat() {
     // S8_UINT contains stencil component
@@ -134,7 +133,7 @@ VkFormat Engine::RenderPass::findSupportedFormat(const std::vector<VkFormat>& ca
         // bufferFeatures : Use cases that are supported for buffers
 
         VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(*(*mainProg)->device->getPhysicalDevice(), format, &props);
+        vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), format, &props);
         if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
             return format;
         }
@@ -146,12 +145,7 @@ VkFormat Engine::RenderPass::findSupportedFormat(const std::vector<VkFormat>& ca
     throw std::runtime_error("failed to find supported format!");
 }
 
-VkRenderPass* Engine::RenderPass::getRenderPass()
+VkRenderPass& Engine::RenderPass::getRenderPass()
 {
-    return &renderPass;
-}
-
-Engine::mainProgram** Engine::RenderPass::getParent()
-{
-    return mainProg;
+    return renderPass;
 }

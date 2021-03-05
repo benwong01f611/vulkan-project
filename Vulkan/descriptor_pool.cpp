@@ -1,9 +1,8 @@
 #include "descriptor_pool.h"
 
-Engine::DescriptorPool::DescriptorPool(mainProgram** mainProgPtr)
+Engine::DescriptorPool::DescriptorPool(Device& deviceRef, SwapChain& swapChainRef) : device(deviceRef), swapChain(swapChainRef)
 {   
-    mainProg = mainProgPtr;
-    std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
+    std::vector<VkImage> swapChainImages = swapChain.getSwapChainImages();
     // Descriptor sets cannot be created directly, need pool for creating sets
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
     // Descriptor count == number of images in swap chain
@@ -20,16 +19,16 @@ Engine::DescriptorPool::DescriptorPool(mainProgram** mainProgPtr)
     // Max num of descriptor sets may be allocated
     poolInfo.maxSets = static_cast<uint32_t>(swapChainImages.size());
 
-    if (vkCreateDescriptorPool(*(*mainProg)->device->getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
+    if (vkCreateDescriptorPool(device.getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
 }
 
-VkDescriptorPool* Engine::DescriptorPool::getDescriptorPool()
+VkDescriptorPool& Engine::DescriptorPool::getDescriptorPool()
 {
-    return &descriptorPool;
+    return descriptorPool;
 }
 
 Engine::DescriptorPool::~DescriptorPool() {
-    vkDestroyDescriptorPool(*(*mainProg)->device->getLogicalDevice(), descriptorPool, nullptr);
+    vkDestroyDescriptorPool(device.getLogicalDevice(), descriptorPool, nullptr);
 }

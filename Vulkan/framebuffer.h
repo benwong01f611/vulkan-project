@@ -3,14 +3,20 @@
 #include <GLFW/glfw3.h>
 #include "main.h"
 namespace Engine {
-	class mainProgram;
+	class Device;
+	class SwapChain;
+	class Image;
+	class RenderPass;
 	class FrameBuffer {
 	public:
-		FrameBuffer(mainProgram** mainProgramPtr);
+		FrameBuffer(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, RenderPass& renderPassRef);
 		~FrameBuffer();
 		std::vector<VkFramebuffer>& getSwapChainFramebuffers();
 	private:
-		mainProgram** mainProg;
 		std::vector<VkFramebuffer> swapChainFramebuffers; // Vector to hold framebuffers
+		SwapChain& swapChain;
+		Image& image;
+		RenderPass& renderPass;
+		Device& device;
 	};
 }

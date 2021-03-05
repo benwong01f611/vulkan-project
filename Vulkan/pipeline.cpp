@@ -3,9 +3,8 @@
 #include <iostream>
 #include <fstream>
 
-Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
+Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, DescriptorSet& descriptorSetRef, RenderPass& renderPassRef) : device(deviceRef), swapChain(swapChainRef), logicalDevice(device.getLogicalDevice()), descriptorSet(descriptorSetRef), renderPass(renderPassRef)
 {
-    logicalDevice = (*mainProgramPtr)->device->getLogicalDevice();
 
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -51,7 +50,7 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     inputAssembly.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     inputAssembly.primitiveRestartEnable = VK_FALSE;
 
-    VkExtent2D swapChainExtent = *(*mainProgramPtr)->swapchain->getSwapChainExtent();
+    VkExtent2D swapChainExtent = swapChain.getSwapChainExtent();
     // The image location (?)
     VkViewport viewport = {};
     viewport.x = 0.0f;
@@ -98,7 +97,7 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     multisampling.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
     multisampling.sampleShadingEnable = VK_TRUE;
     multisampling.minSampleShading = .2f; // closer to 1 is smoother
-    multisampling.rasterizationSamples = *(*mainProgramPtr)->device->getMSAASamples(false);
+    multisampling.rasterizationSamples = device.getMSAASamples(false);
 
     // Depth stencil
     VkPipelineDepthStencilStateCreateInfo depthStencil{};
@@ -134,9 +133,9 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     VkPipelineLayoutCreateInfo pipelineLayoutInfo = {};
     pipelineLayoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
     pipelineLayoutInfo.setLayoutCount = 1;
-    pipelineLayoutInfo.pSetLayouts = (*mainProgramPtr)->descriptorSet->getDescriptorSetLayout();
+    pipelineLayoutInfo.pSetLayouts = &(descriptorSet.getDescriptorSetLayout());
 
-    if (vkCreatePipelineLayout(*logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
+    if (vkCreatePipelineLayout(logicalDevice, &pipelineLayoutInfo, nullptr, &pipelineLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create pipeline layout!");
     }
 
@@ -156,34 +155,34 @@ Engine::Pipeline::Pipeline(mainProgram** mainProgramPtr)
     pipelineInfo.pColorBlendState = &colorBlending;
     pipelineInfo.pDynamicState = nullptr; // Optional
     pipelineInfo.layout = pipelineLayout;
-    pipelineInfo.renderPass = *(*mainProgramPtr)->renderPass->getRenderPass();
+    pipelineInfo.renderPass = renderPass.getRenderPass();
     pipelineInfo.subpass = 0;
     pipelineInfo.basePipelineHandle = VK_NULL_HANDLE; // Optional
 
     // Create graphics pipeline
-    if (vkCreateGraphicsPipelines(*logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
+    if (vkCreateGraphicsPipelines(logicalDevice, VK_NULL_HANDLE, 1, &pipelineInfo, nullptr, &graphicsPipeline) != VK_SUCCESS) {
         throw std::runtime_error("failed to create graphics pipeline!");
     }
 
     // Destroy the shader module upon the graphics pipeline is created
-    vkDestroyShaderModule(*logicalDevice, fragShaderModule, nullptr);
-    vkDestroyShaderModule(*logicalDevice, vertShaderModule, nullptr);
+    vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
+    vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
 }
 
 Engine::Pipeline::~Pipeline()
 {
-    vkDestroyPipeline(*logicalDevice, graphicsPipeline, nullptr); // Destroy pipeline
-    vkDestroyPipelineLayout(*logicalDevice, pipelineLayout, nullptr); // Destroy this unknown shit
+    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr); // Destroy pipeline
+    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr); // Destroy this unknown shit
 }
 
-VkPipeline* Engine::Pipeline::getGraphicsPipeline()
+VkPipeline& Engine::Pipeline::getGraphicsPipeline()
 {
-    return &graphicsPipeline;
+    return graphicsPipeline;
 }
 
-VkPipelineLayout* Engine::Pipeline::getPipelineLayout()
+VkPipelineLayout& Engine::Pipeline::getPipelineLayout()
 {
-    return &pipelineLayout;
+    return pipelineLayout;
 }
 
 std::vector<char> Engine::Pipeline::readFile(const std::string& filename) {
@@ -215,7 +214,7 @@ VkShaderModule Engine::Pipeline::createShaderModule(const std::vector<char>& cod
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
     // Create shader module
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(*logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shader module!");
     }
     return shaderModule;

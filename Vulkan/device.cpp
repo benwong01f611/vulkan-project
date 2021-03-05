@@ -95,8 +95,8 @@ Engine::Device::Device(Instance& instanceRef, Surface& surfaceRef, Debug& debugg
 
     // If validation layers are enabled, layers will be set
     if (debugger.enableValidationLayers) {
-        createInfo.enabledLayerCount = static_cast<uint32_t>((*mainProg)->debugger->validationLayers.size());
-        createInfo.ppEnabledLayerNames = (*mainProg)->debugger->validationLayers.data();
+        createInfo.enabledLayerCount = static_cast<uint32_t>(debugger.validationLayers.size());
+        createInfo.ppEnabledLayerNames = debugger.validationLayers.data();
     }
     else {
         createInfo.enabledLayerCount = 0;
@@ -152,7 +152,7 @@ VkSampleCountFlagBits Engine::Device::getMaxUsableSampleCount()
 
     // Get max sample count
     VkSampleCountFlags counts = physicalDeviceProperties.limits.framebufferColorSampleCounts & physicalDeviceProperties.limits.framebufferDepthSampleCounts;
-    if ((*mainProg)->debugger->enableValidationLayers)
+    if (debugger.enableValidationLayers)
         std::cout << "Max sample (MSAA): " << counts << std::endl;
     if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
     if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
@@ -180,7 +180,7 @@ Engine::Device::QueueFamilyIndices Engine::Device::findQueueFamilies(VkPhysicalD
         }
         // If the queue family is the one that supports presentation support, set the present family index to i (index of queue family)
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, *surface, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surfaceKHR, &presentSupport);
         if (presentSupport)
             indices.presentFamily = i;
         if (indices.isComplete()) break;
@@ -210,31 +210,31 @@ bool Engine::Device::checkDeviceExtensionSupport(VkPhysicalDevice device)
     return requiredExtensions.empty();
 }
 
-VkSampleCountFlagBits* Engine::Device::getMSAASamples(bool isMax)
+VkSampleCountFlagBits& Engine::Device::getMSAASamples(bool isMax)
 {
     if (isMax)
-        return &maxMSAASamples;
+        return maxMSAASamples;
     else
-        return &msaaSamples;
+        return msaaSamples;
 
 }
 
-VkPhysicalDevice* Engine::Device::getPhysicalDevice()
+VkPhysicalDevice& Engine::Device::getPhysicalDevice()
 {
-    return &physicalDevice;
+    return physicalDevice;
 }
 
-VkDevice* Engine::Device::getLogicalDevice()
+VkDevice& Engine::Device::getLogicalDevice()
 {
-    return &logicalDevice;
+    return logicalDevice;
 }
 
-VkQueue* Engine::Device::getGraphicsQueue()
+VkQueue& Engine::Device::getGraphicsQueue()
 {
-    return &graphicsQueue;
+    return graphicsQueue;
 }
 
-VkQueue* Engine::Device::getPresentQueue()
+VkQueue& Engine::Device::getPresentQueue()
 {
-    return &presentQueue;
+    return presentQueue;
 }

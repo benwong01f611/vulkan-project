@@ -11,9 +11,11 @@
 
 namespace Engine {
 	class mainProgram;
+
+	class Instance;
 	class Debug{
 	public:
-		Debug(mainProgram** mainProgramPtr);
+		Debug(Instance& instanceRef);
 		~Debug();
 		static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		// If it is not in debug stage, disable the validation layers, else enable it
@@ -30,6 +32,7 @@ namespace Engine {
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE; // Vulkan debug messenger
 	private:
 		VkInstance& instance;
+		Instance& instanceLocalRef;
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 			VkDebugUtilsMessageTypeFlagsEXT messageType,

@@ -3,11 +3,12 @@
 #include <GLFW/glfw3.h>
 #include "main.h"
 namespace Engine {
-	class mainProgram;
+	class Device;
 	class Memory {
 	public:
-		Memory(mainProgram** mainProgramPtr);
+		Memory(Device& deviceRef);
 		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	private:
+		Device& device;
 	};
 }

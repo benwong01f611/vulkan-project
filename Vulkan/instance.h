@@ -10,14 +10,16 @@
 
 namespace Engine {
 	class mainProgram;
+	class Debug;
 	class Instance {
 		public:
-			Instance(Engine::mainProgram** mainProgramPtr);
+			Instance(Debug& debuggerRef);
 			~Instance();
 			std::vector<const char*> getRequiredExtensions();
 			bool checkValidationLayerSupport();
 			VkInstance& getInstance();
 		private:
 			VkInstance instance;
+			Debug& debugger;
 	};
 }

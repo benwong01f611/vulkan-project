@@ -5,15 +5,16 @@
 #include "main.h"
 
 namespace Engine {
-
-	class mainProgram;
+	class Instance;
+	class Window;
 	class Surface {
 	public:
-		Surface(mainProgram** mainProgramPtr);
+		Surface(Instance& instanceRef, Window& windowRef);
 		~Surface();
 		VkSurfaceKHR& getSurface();
 		void initSurface();
 	private:
+		GLFWwindow*& window;
 		VkInstance& instance;
 		VkSurfaceKHR surface;
 	};

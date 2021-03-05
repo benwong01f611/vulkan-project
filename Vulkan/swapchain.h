@@ -21,11 +21,12 @@ namespace Engine {
         std::vector<VkSurfaceFormatKHR> formats;
         std::vector<VkPresentModeKHR> presentModes;
     };
-    
+    class Device;
+    class Surface;
+    class Window;
     class SwapChain {
     public:
         SwapChain(Device& device, Surface& surface, Window& window);
-        SwapChain(bool isTemp);
         ~SwapChain();
         static SwapChainSupportDetails querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface);
         VkSwapchainKHR& getSwapChain();

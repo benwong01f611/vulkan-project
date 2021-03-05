@@ -5,9 +5,8 @@
 #include <tiny_obj_loader.h>
 #include <chrono>
 
-Engine::Model::Model(mainProgram** mainProgramPtr,KeyInput::keyboardKeys& keysref) : keys(keysref)
+Engine::Model::Model(Device& deviceRef, SwapChain& swapChainRef, Debug& debuggerRef, CommandBuffer& commandBufferRef, Memory& memoryRef, KeyInput::keyboardKeys& keysref) : device(deviceRef), swapChain(swapChainRef), debugger(debuggerRef), commandBufferLocalRef(commandBufferRef), memory(memoryRef),keys(keysref), logicalDevice(device.getLogicalDevice())
 {
-	mainProg = mainProgramPtr;
 }
 
 void Engine::Model::loadModel()
@@ -19,7 +18,7 @@ void Engine::Model::loadModel()
 
     if (!tinyobj::LoadObj(&attrib, &shapes, &materials, &warn, &err, model_path.c_str()))
         throw std::runtime_error(warn + err);
-    if ((*mainProg)->debugger->enableValidationLayers)
+    if (debugger.enableValidationLayers)
         std::cout << "[tinyobjloader] Warning: " << warn << std::endl << "[tinyobjloader] Error: " << err << std::endl;
 
     std::unordered_map<Vertex, uint32_t> uniqueVertices{};
@@ -65,40 +64,40 @@ void Engine::Model::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, Vk
     // Set to exclusive if the image will not be shared to others
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
 
-    logicalDevice = (*mainProg)->device->getLogicalDevice();
+    logicalDevice = device.getLogicalDevice();
 
-    if (vkCreateBuffer(*logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
+    if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer!");
     }
 
     // Get available tpes of memory
     VkMemoryRequirements memRequirements;
-    vkGetBufferMemoryRequirements(*logicalDevice, buffer, &memRequirements);
+    vkGetBufferMemoryRequirements(logicalDevice, buffer, &memRequirements);
 
     VkMemoryAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     // Allocation size is equal to the memory size requirement
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = (*mainProg)->memory->findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = memory.findMemoryType(memRequirements.memoryTypeBits, properties);
 
-    if (vkAllocateMemory(*logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
+    if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate buffer memory!");
     }
 
     // Associate memory with buffer, 0 is offset, if it is non-zero, it must be divisible by memRequirements.alignment
-    vkBindBufferMemory(*logicalDevice, buffer, bufferMemory, 0);
+    vkBindBufferMemory(logicalDevice, buffer, bufferMemory, 0);
 }
 
 void Engine::Model::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceSize size)
 {
-    VkCommandBuffer commandBuffer = (*mainProg)->commandBuffer->beginSingleTimeCommands();
+    VkCommandBuffer commandBuffer = commandBufferLocalRef.beginSingleTimeCommands();
 
     VkBufferCopy copyRegion{};
     copyRegion.size = size;
     // Contents of buffer is transferred by vkCmdCopyBuffer, 1 means the region count
     vkCmdCopyBuffer(commandBuffer, srcBuffer, dstBuffer, 1, &copyRegion);
 
-    (*mainProg)->commandBuffer->endSingleTimeCommands(commandBuffer);
+    commandBufferLocalRef.endSingleTimeCommands(commandBuffer);
 }
 
 void Engine::Model::createVertexBuffer()
@@ -117,9 +116,9 @@ void Engine::Model::createVertexBuffer()
     void* data;
     // Second last parameter must be zero as no flag is currently not available by API
     // Last paramter is the output
-    vkMapMemory(*logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, vertices.data(), (size_t)bufferSize);
-    vkUnmapMemory(*logicalDevice, stagingBufferMemory);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     // Create vertex buffer
     // VK_BUFFER_USAGE_TRANSFER_DST_BIT: use buffer as destination in memory transfer
@@ -127,8 +126,8 @@ void Engine::Model::createVertexBuffer()
 
     copyBuffer(stagingBuffer, vertexBuffer, bufferSize);
 
-    vkDestroyBuffer(*logicalDevice, stagingBuffer, nullptr);
-    vkFreeMemory(*logicalDevice, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 }
 
 void Engine::Model::createIndexBuffer()
@@ -140,22 +139,22 @@ void Engine::Model::createIndexBuffer()
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_SRC_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, stagingBuffer, stagingBufferMemory);
 
     void* data;
-    vkMapMemory(*logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
+    vkMapMemory(logicalDevice, stagingBufferMemory, 0, bufferSize, 0, &data);
     memcpy(data, indices.data(), (size_t)bufferSize);
-    vkUnmapMemory(*logicalDevice, stagingBufferMemory);
+    vkUnmapMemory(logicalDevice, stagingBufferMemory);
 
     createBuffer(bufferSize, VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, indexBuffer, indexBufferMemory);
 
     copyBuffer(stagingBuffer, indexBuffer, bufferSize);
 
-    vkDestroyBuffer(*logicalDevice, stagingBuffer, nullptr);
-    vkFreeMemory(*logicalDevice, stagingBufferMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, stagingBuffer, nullptr);
+    vkFreeMemory(logicalDevice, stagingBufferMemory, nullptr);
 }
 
 void Engine::Model::createUniformBuffers()
 {
     VkDeviceSize bufferSize = sizeof(UniformBufferObject);
-    std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
+    std::vector<VkImage> swapChainImages = swapChain.getSwapChainImages();
     uniformBuffers.resize(swapChainImages.size()); // Resize the uniform buffers to match with the size of swapchain
     uniformBuffersMemory.resize(swapChainImages.size());
     for (size_t i = 0; i < swapChainImages.size(); i++) {
@@ -196,20 +195,20 @@ VkDeviceMemory& Engine::Model::getVertexBuffersMemory()
 void Engine::Model::destroyUniformBuffer()
 {
     // Destroy uniform buffer
-    for (size_t i = 0; i < (*(*mainProg)->swapchain->getSwapChainImages()).size(); i++) {
-        vkDestroyBuffer(*logicalDevice, uniformBuffers[i], nullptr);
-        vkFreeMemory(*logicalDevice, uniformBuffersMemory[i], nullptr);
+    for (size_t i = 0; i < swapChain.getSwapChainImages().size(); i++) {
+        vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
+        vkFreeMemory(logicalDevice, uniformBuffersMemory[i], nullptr);
     }
 }
 
 Engine::Model::~Model() {
     destroyUniformBuffer();
 
-    vkDestroyBuffer(*logicalDevice, indexBuffer, nullptr);
-    vkFreeMemory(*logicalDevice, indexBufferMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
+    vkFreeMemory(logicalDevice, indexBufferMemory, nullptr);
 
-    vkDestroyBuffer(*logicalDevice, vertexBuffer, nullptr);
-    vkFreeMemory(*logicalDevice, vertexBufferMemory, nullptr);
+    vkDestroyBuffer(logicalDevice, vertexBuffer, nullptr);
+    vkFreeMemory(logicalDevice, vertexBufferMemory, nullptr);
 }
 
 void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
@@ -250,14 +249,14 @@ void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
     // Define model, view and projection transformations
     UniformBufferObject ubo{};
     // Rotate Z with 90 degrees/s
-    VkExtent2D swapChainExtent = *(*mainProg)->swapchain->getSwapChainExtent();
+    VkExtent2D swapChainExtent = swapChain.getSwapChainExtent();
     ubo.model = glm::rotate(glm::mat4(1.0f), time * glm::radians(90.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.view = glm::lookAt(glm::vec3(viewCoor[0], viewCoor[1], viewCoor[2]), glm::vec3(0.0f, 0.0f, 0.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     ubo.proj = glm::perspective(glm::radians(90.0f), swapChainExtent.width / (float)swapChainExtent.height, 0.1f, 10.0f);
     ubo.proj[1][1] *= -1; // The Y-coordinate is inverted in OpenGL
 
     void* data;
-    vkMapMemory(*(*mainProg)->device->getLogicalDevice(), uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+    vkMapMemory(device.getLogicalDevice(), uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
     memcpy(data, &ubo, sizeof(ubo));
-    vkUnmapMemory(*(*mainProg)->device->getLogicalDevice(), uniformBuffersMemory[currentImage]);
+    vkUnmapMemory(device.getLogicalDevice(), uniformBuffersMemory[currentImage]);
 }

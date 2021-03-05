@@ -5,7 +5,6 @@
 #include "main.h"
 
 namespace Engine {
-	class mainProgram;
 	class KeyInput;
 	class Window {
 		public:
@@ -16,7 +15,7 @@ namespace Engine {
 			int windowHeight;
 
 			static void framebufferResizeCallback(GLFWwindow* window, int width, int height);
-			GLFWwindow** getWindow();
+			GLFWwindow* & getWindow();
 		private:
 			GLFWwindow* window;
 			KeyInput& keyInput;

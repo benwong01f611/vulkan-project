@@ -2,8 +2,37 @@
 #include <iostream>
 
 
+Engine::KeyInput::keyboardKeys keys;
+
 Engine::mainProgram::mainProgram()
 {
+    keyInput = KeyInput();
+    memory = new Engine::Memory(*device);
+    //buffer = new Engine::Buffer(mainProgramPtr);
+    commandBuffer = new Engine::CommandBuffer(*device, *swapchain, *renderPass, *commandPool, *frameBuffer, *pipeline, *model, *descriptorSet);
+    model = new Engine::Model(*device, *swapchain, *debugger, *commandBuffer, *memory, keys);
+
+    window = new Engine::Window(keyInput, framebufferResized);
+    debugger = new Engine::Debug(*instance);
+    instance = new Engine::Instance(*debugger);
+    surface = new Engine::Surface(*instance, *window);
+    device = new Engine::Device(*instance, *surface, *debugger);
+    swapchain = new Engine::SwapChain(*device, *surface, *window);
+    renderPass = new Engine::RenderPass(*device, *swapchain);
+    descriptorSet = new Engine::DescriptorSet(*device, *swapchain, *image, *model, *descriptorPool);
+    pipeline = new Engine::Pipeline(*device, *swapchain, *descriptorSet, *renderPass);
+    commandPool = new Engine::CommandPool(*device);
+    image = new Engine::Image(*device, *swapchain, *model, *memory, *commandBuffer);
+    frameBuffer = new Engine::FrameBuffer(*device, *swapchain, *image, *renderPass);
+    image->createTexture();
+    model->loadModel();
+    model->createVertexBuffer();
+    model->createIndexBuffer();
+    model->createUniformBuffers();
+    descriptorPool = new Engine::DescriptorPool(*device, *swapchain);
+    descriptorSet->createDescriptorSets();
+    commandBuffer->createCommandBuffers();
+    semaphores = new Engine::Semaphores(*swapchain, *device);
 }
 
 Engine::mainProgram::~mainProgram()
@@ -20,7 +49,6 @@ Engine::mainProgram::~mainProgram()
 
 }
 
-Engine::KeyInput::keyboardKeys keys;
 
 void Engine::mainProgram::cleanupSwapChain() {
     image->cleanImages();
@@ -33,40 +61,9 @@ void Engine::mainProgram::cleanupSwapChain() {
     delete descriptorPool;
 }
 
-void Engine::mainProgram::init(mainProgram** mainProgPtr) {
-    mainProgramPtr = mainProgPtr;
-    keyInput = KeyInput();
-    memory = new Engine::Memory(mainProgramPtr);
-    //buffer = new Engine::Buffer(mainProgramPtr);
-    commandBuffer = new Engine::CommandBuffer(mainProgramPtr);
-    model = new Engine::Model(mainProgramPtr,keys);
-
-    window = new Engine::Window(keyInput,framebufferResized);
-    debugger = new Engine::Debug(mainProgramPtr);
-    instance = new Engine::Instance(mainProgramPtr);
-    surface = new Engine::Surface(mainProgramPtr);
-    device = new Engine::Device(instance, surface, debugger);
-    swapchain = new Engine::SwapChain(mainProgramPtr);
-    renderPass = new Engine::RenderPass(mainProgramPtr);
-    descriptorSet = new Engine::DescriptorSet(mainProgramPtr);
-    pipeline = new Engine::Pipeline(mainProgramPtr);
-    commandPool = new Engine::CommandPool(mainProgramPtr);
-    image = new Engine::Image(mainProgramPtr);
-    frameBuffer = new Engine::FrameBuffer(mainProgramPtr);
-    image->createTexture();
-    model->loadModel();
-    model->createVertexBuffer();
-    model->createIndexBuffer();
-    model->createUniformBuffers();
-    descriptorPool = new Engine::DescriptorPool(mainProgramPtr);
-    descriptorSet->createDescriptorSets();
-    commandBuffer->createCommandBuffers();
-    semaphores = new Engine::Semaphores(*swapchain, *device);
-}
-
 void Engine::mainProgram::mainLoop() {
 	// Keep the application running until error occurs or window is closed
-	while (!glfwWindowShouldClose(*window->getWindow())) {
+	while (!glfwWindowShouldClose(window->getWindow())) {
 		glfwPollEvents(); // Poll any events while the window is not closed
 		drawFrame(); // Keep drawing frames while the program is running
 	}
@@ -175,7 +172,7 @@ void Engine::mainProgram::recreateSwapChain()
     // If one of them is 0, wait until the window is resized to at least 1x1
     int width = 0, height = 0;
     while (width == 0 || height == 0) {
-        glfwGetFramebufferSize(*window->getWindow(), &width, &height);
+        glfwGetFramebufferSize(window->getWindow(), &width, &height);
         glfwWaitEvents();
     }
 
@@ -184,15 +181,15 @@ void Engine::mainProgram::recreateSwapChain()
     cleanupSwapChain(); // Cleanup the old swapchain
 
     // Recreate the entire swap chain
-    swapchain = new SwapChain(mainProgramPtr);
-    renderPass = new Engine::RenderPass(mainProgramPtr);
-    pipeline = new Engine::Pipeline(mainProgramPtr);
+    swapchain = new SwapChain(*device, *surface, *window);
+    renderPass = new Engine::RenderPass(*device, *swapchain);
+    pipeline = new Engine::Pipeline(*device, *swapchain, *descriptorSet, *renderPass);
     
     image->createColorResources();
     image->createDepthResources();
-    frameBuffer = new Engine::FrameBuffer(mainProgramPtr);
+    frameBuffer = new Engine::FrameBuffer(*device, *swapchain, *image, *renderPass);
     model->createUniformBuffers();
-    descriptorPool = new DescriptorPool(mainProgramPtr);
+    descriptorPool = new DescriptorPool(*device, *swapchain);
     descriptorSet->createDescriptorSets();
     commandBuffer->createCommandBuffers();
 
@@ -275,12 +272,9 @@ void Engine::mainProgram::keyHandler(GLFWwindow* window, int key, int scancode, 
 
 int main() {
 //	Engine::mainProgram prog;
-	Engine::mainProgram* prog;
-	
-	prog = new Engine::mainProgram();
-	prog->init(&prog);
+    Engine::mainProgram prog;
 
-    prog->mainLoop();
+    prog.mainLoop();
 
     std::cout << "Program end!" << std::endl;
 	return 0;

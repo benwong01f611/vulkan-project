@@ -1,13 +1,16 @@
 #pragma once
 #include "main.h"
 namespace Engine {
-	class mainProgram;
+	class Device;
+	class SwapChain;
 	class DescriptorPool {
 	public:
-		DescriptorPool(mainProgram** mainProgramPtr);
+		DescriptorPool(Device& deviceRef, SwapChain& swapChainRef);
 		~DescriptorPool();
 		VkDescriptorPool& getDescriptorPool();
 	private:
 		VkDescriptorPool descriptorPool;
+		Device& device;
+		SwapChain& swapChain;
 	};
 }

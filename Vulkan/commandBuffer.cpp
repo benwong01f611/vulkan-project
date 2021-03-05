@@ -1,8 +1,22 @@
 #include "commandBuffer.h"
 
-Engine::CommandBuffer::CommandBuffer(mainProgram** mainProgramPtr)
+Engine::CommandBuffer::CommandBuffer(   Device& deviceRef,
+                                        SwapChain& swapChainRef, 
+                                        RenderPass& renderPassRef, 
+                                        CommandPool& commandPoolRef, 
+                                        FrameBuffer& frameBufferRef, 
+                                        Pipeline& pipelineRef, 
+                                        Model& modelRef, 
+                                        DescriptorSet& descriptorSetRef) : 
+                                            device(deviceRef), 
+                                            swapChain(swapChainRef), 
+                                            renderPass(renderPassRef), 
+                                            commandPool(commandPoolRef), 
+                                            frameBuffer(frameBufferRef), 
+                                            pipeline(pipelineRef), 
+                                            model(modelRef),
+                                            descriptorSet(descriptorSetRef)
 {
-	mainProg = mainProgramPtr;
 }
 
 Engine::CommandBuffer::~CommandBuffer() {
@@ -16,11 +30,11 @@ VkCommandBuffer Engine::CommandBuffer::beginSingleTimeCommands()
     VkCommandBufferAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-    allocInfo.commandPool = *(*mainProg)->commandPool->getCommandPool();
+    allocInfo.commandPool = commandPool.getCommandPool();
     allocInfo.commandBufferCount = 1;
 
     VkCommandBuffer commandBuffer;
-    vkAllocateCommandBuffers(*(*mainProg)->device->getLogicalDevice(), &allocInfo, &commandBuffer);
+    vkAllocateCommandBuffers(device.getLogicalDevice(), &allocInfo, &commandBuffer);
 
     VkCommandBufferBeginInfo beginInfo{};
     beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -77,22 +91,22 @@ void Engine::CommandBuffer::endSingleTimeCommands(VkCommandBuffer commandBuffer)
     submitInfo.pCommandBuffers = &commandBuffer;
 
     // Submit the command buffer
-    vkQueueSubmit(*(*mainProg)->device->getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
-    vkQueueWaitIdle(*(*mainProg)->device->getGraphicsQueue());
+    vkQueueSubmit(device.getGraphicsQueue(), 1, &submitInfo, VK_NULL_HANDLE);
+    vkQueueWaitIdle(device.getGraphicsQueue());
 
-    vkFreeCommandBuffers(*(*mainProg)->device->getLogicalDevice(), *(*mainProg)->commandPool->getCommandPool(), 1, &commandBuffer);
+    vkFreeCommandBuffers(device.getLogicalDevice(), commandPool.getCommandPool(), 1, &commandBuffer);
 }
 
 
 
 void Engine::CommandBuffer::createCommandBuffers()
 {
-    std::vector<VkFramebuffer> swapChainFramebuffers = *(*mainProg)->frameBuffer->getSwapChainFramebuffers();
+    std::vector<VkFramebuffer> swapChainFramebuffers = frameBuffer.getSwapChainFramebuffers();
     commandBuffers.resize(swapChainFramebuffers.size()); // Resize the command buffers size according to the size of the swap chain
     // Command buffers are allocated with vkAllocateCommandBuffers, and takes VkCommandBufferAllocateInfo struct to specify the command pool and numbers of buffers to allocate
     VkCommandBufferAllocateInfo allocInfo = {};
     allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    allocInfo.commandPool = *(*mainProg)->commandPool->getCommandPool();
+    allocInfo.commandPool = commandPool.getCommandPool();
     // PRIMARY: Can be submitted to a queue for execution, but cannot be called from other command buffers
     // SECONDARY: Cannot be submitted directly, but can be called from primary command buffers.
     allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
@@ -100,7 +114,7 @@ void Engine::CommandBuffer::createCommandBuffers()
     allocInfo.commandBufferCount = (uint32_t)commandBuffers.size();
 
     // Allocate command buffers
-    if (vkAllocateCommandBuffers(*(*mainProg)->device->getLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
+    if (vkAllocateCommandBuffers(device.getLogicalDevice(), &allocInfo, commandBuffers.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate command buffers!");
     }
 
@@ -125,10 +139,10 @@ void Engine::CommandBuffer::createCommandBuffers()
         // Render pass info
         VkRenderPassBeginInfo renderPassInfo = {};
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-        renderPassInfo.renderPass = *(*mainProg)->renderPass->getRenderPass();
+        renderPassInfo.renderPass = renderPass.getRenderPass();
         renderPassInfo.framebuffer = swapChainFramebuffers[i]; // Create framebuffer for each swap chain image
         renderPassInfo.renderArea.offset = { 0, 0 };
-        renderPassInfo.renderArea.extent = *(*mainProg)->swapchain->getSwapChainExtent();
+        renderPassInfo.renderArea.extent = swapChain.getSwapChainExtent();
 
         std::array<VkClearValue, 2> clearValues{};
         clearValues[0].color = { 0.0f, 0.0f, 0.0f, 1.0f }; // 100% opacity
@@ -146,16 +160,16 @@ void Engine::CommandBuffer::createCommandBuffers()
         vkCmdBeginRenderPass(commandBuffers[i], &renderPassInfo, VK_SUBPASS_CONTENTS_INLINE);
 
         // Begin drawing
-        vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, *(*mainProg)->pipeline->getGraphicsPipeline());
+        vkCmdBindPipeline(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getGraphicsPipeline());
 
         // Bind vertex buffers to bindings
-        VkBuffer vertexBuffers[] = { *(*mainProg)->model->getVertexBuffers() };
+        VkBuffer vertexBuffers[] = { model.getVertexBuffers() };
         VkDeviceSize offsets[] = { 0 };
         vkCmdBindVertexBuffers(commandBuffers[i], 0, 1, vertexBuffers, offsets);
         // indexType should be uint_32 since there are lots of vertices to load
-        vkCmdBindIndexBuffer(commandBuffers[i], *(*mainProg)->model->getIndexBuffers(), 0, VK_INDEX_TYPE_UINT32);
+        vkCmdBindIndexBuffer(commandBuffers[i], model.getIndexBuffers(), 0, VK_INDEX_TYPE_UINT32);
         // Bind descriptor sets to command buffer
-        vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, *(*mainProg)->pipeline->getPipelineLayout(), 0, 1, &(*(*mainProg)->descriptorSet->getDescriptorSets())[i], 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffers[i], VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline.getPipelineLayout(), 0, 1, &(descriptorSet.getDescriptorSets()[i]), 0, nullptr);
 
         /*
         vkCmdDraw(commandBuffers[i], vertexCount, instanceCount, firstVertex, firstInstance);
@@ -166,7 +180,7 @@ void Engine::CommandBuffer::createCommandBuffers()
         */
         //vkCmdDraw(commandBuffers[i], static_cast<uint32_t>(vertices.size()), 1, 0, 0);
 
-        vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>((*mainProg)->model->indices.size()), 1, 0, 0, 0);
+        vkCmdDrawIndexed(commandBuffers[i], static_cast<uint32_t>(model.indices.size()), 1, 0, 0, 0);
         // End drawing
         vkCmdEndRenderPass(commandBuffers[i]);
 
@@ -186,5 +200,5 @@ void Engine::CommandBuffer::destroyCommandBuffers()
 {
     // Recreating command buffers is wasteful (?), which can reuse existing pool to allocate new command buffers
     // Like destroying the object requires time to recreate, so free up the content is much more efficient than destroying the object
-    vkFreeCommandBuffers(*(*mainProg)->device->getLogicalDevice(), *(*mainProg)->commandPool->getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
+    vkFreeCommandBuffers(device.getLogicalDevice(), commandPool.getCommandPool(), static_cast<uint32_t>(commandBuffers.size()), commandBuffers.data());
 }

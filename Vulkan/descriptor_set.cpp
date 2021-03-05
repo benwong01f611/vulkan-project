@@ -2,9 +2,8 @@
 #include <array>
 #include <iostream>
 
-Engine::DescriptorSet::DescriptorSet(mainProgram** mainProgramPtr)
+Engine::DescriptorSet::DescriptorSet(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, Model& modelRef, DescriptorPool& descriptorPoolRef) : device(deviceRef), swapChain(swapChainRef), image(imageRef), model(modelRef), descriptorPool(descriptorPoolRef)
 {
-    mainProg = mainProgramPtr;
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0; // Binding used in shader
     uboLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
@@ -27,7 +26,7 @@ Engine::DescriptorSet::DescriptorSet(mainProgram** mainProgramPtr)
     layoutInfo.pBindings = bindings.data();
 
     
-    if (vkCreateDescriptorSetLayout(*(*mainProgramPtr)->device->getLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
+    if (vkCreateDescriptorSetLayout(device.getLogicalDevice(), &layoutInfo, nullptr, &descriptorSetLayout) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor set layout!");
     }
     
@@ -35,35 +34,35 @@ Engine::DescriptorSet::DescriptorSet(mainProgram** mainProgramPtr)
 
 
 
-VkDescriptorSetLayout* Engine::DescriptorSet::getDescriptorSetLayout()
+VkDescriptorSetLayout& Engine::DescriptorSet::getDescriptorSetLayout()
 {
-    return &descriptorSetLayout;
+    return descriptorSetLayout;
 }
 
-std::vector<VkDescriptorSet>* Engine::DescriptorSet::getDescriptorSets()
+std::vector<VkDescriptorSet>& Engine::DescriptorSet::getDescriptorSets()
 {
-    return &descriptorSets;
+    return descriptorSets;
 }
 
 void Engine::DescriptorSet::createDescriptorSets()
 {
-    std::vector<VkImage> swapChainImages = *(*mainProg)->swapchain->getSwapChainImages();
+    std::vector<VkImage> swapChainImages = swapChain.getSwapChainImages();
     std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = *(*mainProg)->descriptorPool->getDescriptorPool();
+    allocInfo.descriptorPool = descriptorPool.getDescriptorPool();
     // Descriptor set count == number of images in swap chain
     allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
     allocInfo.pSetLayouts = layouts.data();
 
     // Number of descriptor sets == number of images in swap chain
     descriptorSets.resize(swapChainImages.size());
-    if (vkAllocateDescriptorSets(*(*mainProg)->device->getLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
+    if (vkAllocateDescriptorSets(device.getLogicalDevice(), &allocInfo, descriptorSets.data()) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate descriptor sets!");
     }
 
     // For each descriptor set
-    std::vector<VkBuffer> uniformBuffers = *(*mainProg)->model->getUniformBuffers();
+    std::vector<VkBuffer> uniformBuffers = model.getUniformBuffers();
     for (size_t i = 0; i < swapChainImages.size(); i++) {
         VkDescriptorBufferInfo bufferInfo{};
         bufferInfo.buffer = uniformBuffers[i];
@@ -75,8 +74,8 @@ void Engine::DescriptorSet::createDescriptorSets()
         // Bind actual image and sampler resources to descriptors in descriptor set
         VkDescriptorImageInfo imageInfo{};
         imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-        imageInfo.imageView = *(*mainProg)->image->getTextureImageView();
-        imageInfo.sampler = *(*mainProg)->image->getTextureSampler();
+        imageInfo.imageView = image.getTextureImageView();
+        imageInfo.sampler = image.getTextureSampler();
 
         std::array<VkWriteDescriptorSet, 2> descriptorWrites{};
 
@@ -97,6 +96,6 @@ void Engine::DescriptorSet::createDescriptorSets()
         descriptorWrites[1].pImageInfo = &imageInfo;
 
         // Update descriptor sets for each images
-        vkUpdateDescriptorSets(*(*mainProg)->device->getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
+        vkUpdateDescriptorSets(device.getLogicalDevice(), static_cast<uint32_t>(descriptorWrites.size()), descriptorWrites.data(), 0, nullptr);
     }
 }

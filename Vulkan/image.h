@@ -4,10 +4,14 @@
 #include "main.h"
 
 namespace Engine {
-	class mainProgram;
+	class Device;
+	class SwapChain;
+	class Model;
+	class Memory;
+	class CommandBuffer;
 	class Image {
 	public:
-		Image(mainProgram** mainProgramPtr);
+		Image(Device& deviceRef, SwapChain& swapChainRef, Model& modelRef, Memory& memoryRef, CommandBuffer& commandBufferRef);
 		~Image();
 		void createColorResources();
 		VkImage createImage(uint32_t width, uint32_t height, uint32_t mipLevels, VkSampleCountFlagBits numSamples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
@@ -28,9 +32,6 @@ namespace Engine {
 		void generateMipmaps(VkImage image, VkFormat imageFormat, int32_t texWidth, int32_t texHeight, uint32_t mipLevels);
 		void cleanImages();
 	private:
-		mainProgram** mainProg;
-		VkDevice* logicalDevice;
-
 		VkImage colorImage;
 		VkDeviceMemory colorImageMemory;
 		VkImageView colorImageView;
@@ -46,5 +47,12 @@ namespace Engine {
 		VkSampler textureSampler;
 		std::string texture_path = "obj/viking_room.png";
 		uint32_t mipLevels;
+
+		Device& device;
+		SwapChain& swapChain;
+		VkDevice& logicalDevice;
+		Model& model;
+		Memory& memory;
+		CommandBuffer& commandBuffer;
 	};
 }

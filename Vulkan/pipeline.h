@@ -7,9 +7,13 @@
 
 namespace Engine {
 	class SwapChain;
+	class Device;
+	class SwapChain;
+	class DescriptorSet;
+	class RenderPass;
 	class Pipeline {
 	public:
-		Pipeline(mainProgram** mainProgramPtr);
+		Pipeline(Device& deviceRef, SwapChain& swapChainRef, DescriptorSet& descriptorSetRef, RenderPass& renderPassRef);
 		~Pipeline();
 		VkPipeline& getGraphicsPipeline();
 		VkPipelineLayout& getPipelineLayout();
@@ -19,5 +23,9 @@ namespace Engine {
 		VkPipelineLayout pipelineLayout; // Pipeline layout
 		VkPipeline graphicsPipeline;
 		VkDevice& logicalDevice;
+		RenderPass& renderPass;
+		Device& device;
+		SwapChain& swapChain;
+		DescriptorSet& descriptorSet;
 	};
 }

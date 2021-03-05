@@ -2,14 +2,12 @@
 
 Engine::Semaphores::Semaphores(Engine::SwapChain& swapChainref, Engine::Device& deviceref) : swapChain(swapChainref),device(deviceref)
 {
-    swapChain = swapChainref;
-    device = deviceref;
-    VkDevice& logicalDevice = *device.getLogicalDevice();
+    VkDevice& logicalDevice = device.getLogicalDevice();
     // Resizes the vector according to the MAX_FRAMES_IN_FLIGHT to match with it
     imageAvailableSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     renderFinishedSemaphores.resize(MAX_FRAMES_IN_FLIGHT);
     inFlightFences.resize(MAX_FRAMES_IN_FLIGHT);
-    imagesInFlight.resize((*swapChain.getSwapChainImages()).size(), VK_NULL_HANDLE);
+    imagesInFlight.resize(swapChain.getSwapChainImages().size(), VK_NULL_HANDLE);
 
     VkSemaphoreCreateInfo semaphoreInfo{};
     semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
@@ -30,7 +28,7 @@ Engine::Semaphores::Semaphores(Engine::SwapChain& swapChainref, Engine::Device& 
 
 Engine::Semaphores::~Semaphores()
 {
-    VkDevice& logicalDevice = *device.getLogicalDevice();
+    VkDevice& logicalDevice = device.getLogicalDevice();
     // Destroy semaphore and fence for all frames
     for (size_t i = 0; i < MAX_FRAMES_IN_FLIGHT; i++) {
         vkDestroySemaphore(logicalDevice, renderFinishedSemaphores[i], nullptr);
