@@ -4,17 +4,13 @@ Engine::CommandBuffer::CommandBuffer(   Device& deviceRef,
                                         SwapChain& swapChainRef, 
                                         RenderPass& renderPassRef, 
                                         CommandPool& commandPoolRef, 
-                                        FrameBuffer& frameBufferRef, 
                                         Pipeline& pipelineRef, 
-                                        Model& modelRef, 
                                         DescriptorSet& descriptorSetRef) : 
-                                            device(deviceRef), 
+                                            device(deviceRef),
                                             swapChain(swapChainRef), 
                                             renderPass(renderPassRef), 
                                             commandPool(commandPoolRef), 
-                                            frameBuffer(frameBufferRef), 
                                             pipeline(pipelineRef), 
-                                            model(modelRef),
                                             descriptorSet(descriptorSetRef)
 {
 }
@@ -99,9 +95,9 @@ void Engine::CommandBuffer::endSingleTimeCommands(VkCommandBuffer commandBuffer)
 
 
 
-void Engine::CommandBuffer::createCommandBuffers()
+void Engine::CommandBuffer::createCommandBuffers(FrameBuffer& framebufferRef, Model& model)
 {
-    std::vector<VkFramebuffer> swapChainFramebuffers = frameBuffer.getSwapChainFramebuffers();
+    std::vector<VkFramebuffer> swapChainFramebuffers = framebufferRef.getSwapChainFramebuffers();
     commandBuffers.resize(swapChainFramebuffers.size()); // Resize the command buffers size according to the size of the swap chain
     // Command buffers are allocated with vkAllocateCommandBuffers, and takes VkCommandBufferAllocateInfo struct to specify the command pool and numbers of buffers to allocate
     VkCommandBufferAllocateInfo allocInfo = {};

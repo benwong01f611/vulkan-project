@@ -6,9 +6,8 @@ namespace Engine {
 	class Device;
 	class Memory {
 	public:
-		Memory(Device& deviceRef);
-		uint32_t findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties);
+		Memory();
+		uint32_t findMemoryType(Device& device, uint32_t typeFilter, VkMemoryPropertyFlags properties);
 	private:
-		Device& device;
 	};
 }

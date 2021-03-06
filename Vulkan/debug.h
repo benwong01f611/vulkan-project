@@ -15,7 +15,7 @@ namespace Engine {
 	class Instance;
 	class Debug{
 	public:
-		Debug(Instance& instanceRef);
+		Debug();
 		~Debug();
 		static void populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreateInfoEXT& createInfo);
 		// If it is not in debug stage, disable the validation layers, else enable it
@@ -25,14 +25,13 @@ namespace Engine {
 				const static bool enableValidationLayers = true;
 		#endif
 		
-		void initDebug();
+		void initDebug(Instance* instancePtr);
 		const std::vector<const char*> validationLayers = {
 				"VK_LAYER_KHRONOS_validation"
 		};;
 		VkDebugUtilsMessengerEXT debugMessenger = VK_NULL_HANDLE; // Vulkan debug messenger
 	private:
-		VkInstance& instance;
-		Instance& instanceLocalRef;
+		Instance* instance;
 		static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 			VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
 			VkDebugUtilsMessageTypeFlagsEXT messageType,

@@ -2,17 +2,17 @@
 #include "main.h"
 
 
-Engine::Debug::Debug(Instance& instanceRef) : instanceLocalRef(instanceRef), instance(instanceLocalRef.getInstance())
+Engine::Debug::Debug()
 {
 }
 
 Engine::Debug::~Debug()
 {
     if (!enableValidationLayers) return;
-    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance, "vkDestroyDebugUtilsMessengerEXT");
+    auto func = (PFN_vkDestroyDebugUtilsMessengerEXT)vkGetInstanceProcAddr(instance->getInstance(), "vkDestroyDebugUtilsMessengerEXT");
     if (func != nullptr) {
         auto pAllocator = nullptr;
-        func(instance, Debug::debugMessenger, pAllocator);
+        func(instance->getInstance(), Debug::debugMessenger, pAllocator);
     }
 }
 
@@ -26,14 +26,14 @@ void Engine::Debug::populateDebugMessengerCreateInfo(VkDebugUtilsMessengerCreate
     createInfo.pUserData = nullptr; // Optional
 }
 
-void Engine::Debug::initDebug()
+void Engine::Debug::initDebug(Instance* instancePtr)
 {
-    instance = instanceLocalRef.getInstance();
+    instance = instancePtr;
     // If validation layers are disabled then we don't need to set it up
     if (!enableValidationLayers) return;
     VkDebugUtilsMessengerCreateInfoEXT createInfo;
     populateDebugMessengerCreateInfo(createInfo);
-    if (CreateDebugUtilsMessengerEXT(instance, &createInfo, nullptr, &(Debug::debugMessenger)) != VK_SUCCESS) {
+    if (CreateDebugUtilsMessengerEXT(instance->getInstance(), &createInfo, nullptr, &(Debug::debugMessenger)) != VK_SUCCESS) {
         throw std::runtime_error("failed to set up debug messenger!");
     }
 }

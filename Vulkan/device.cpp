@@ -25,6 +25,7 @@ struct Engine::Device::QueueFamilyIndices {
 
 void Engine::Device::pickPhysicalDevice()
 {
+    VkInstance& vkInstance = instance.getInstance();
     // Number of device
     uint32_t deviceCount = 0;
     // Find the number of devices (GPU) available on host computer
@@ -50,7 +51,7 @@ void Engine::Device::pickPhysicalDevice()
         throw std::runtime_error("Failed to find a suitable GPU!");
     }
 }
-Engine::Device::Device(Instance& instanceRef, Surface& surfaceRef, Debug& debuggerRef) : instance(instanceRef), surface(surfaceRef), vkInstance(instance.getInstance()), surfaceKHR(surface.getSurface()), debugger(debuggerRef)
+Engine::Device::Device(Instance& instanceRef, Surface& surfaceRef, Debug& debuggerRef) : instance(instanceRef), surface(surfaceRef), debugger(debuggerRef)
 {
     pickPhysicalDevice();
     // This index is the physical device's queue index
@@ -134,7 +135,7 @@ bool Engine::Device::isDeviceSuitable(VkPhysicalDevice device)
     // Verify swap chain is adequate (sufficient)
     bool swapChainAdequate = false;
     if (extensionsSupported) {
-        SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device,surfaceKHR);
+        SwapChainSupportDetails swapChainSupport = SwapChain::querySwapChainSupport(device, surface.getSurface());
         // If the swapChainSupport formats and presentModes are NOT empty, swapChainAdequate will be true
         swapChainAdequate = !swapChainSupport.formats.empty() && !swapChainSupport.presentModes.empty();
     }
@@ -180,7 +181,7 @@ Engine::Device::QueueFamilyIndices Engine::Device::findQueueFamilies(VkPhysicalD
         }
         // If the queue family is the one that supports presentation support, set the present family index to i (index of queue family)
         VkBool32 presentSupport = false;
-        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surfaceKHR, &presentSupport);
+        vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface.getSurface(), &presentSupport);
         if (presentSupport)
             indices.presentFamily = i;
         if (indices.isComplete()) break;

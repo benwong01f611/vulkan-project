@@ -14,11 +14,11 @@ namespace Engine {
         }
     };
 
-    SwapChain::SwapChain(Device& deviceRef, Surface& surfaceRef, Window& windowRef) : device(deviceRef), physicalDevice(device.getPhysicalDevice()),logicalDevice(device.getLogicalDevice()),surface(surfaceRef),surfaceKHR(surface.getSurface()),window(windowRef)
+    SwapChain::SwapChain(Device& deviceRef, Surface& surfaceRef, Window& windowRef) : device(deviceRef), surface(surfaceRef),window(windowRef)
     {
-        
+        VkDevice& logicalDevice = device.getLogicalDevice();
         // Query swap chain support from physical device
-        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(physicalDevice, surfaceKHR);
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device.getPhysicalDevice(), surface.getSurface());
 
         // Swap chain details
         VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
@@ -35,7 +35,7 @@ namespace Engine {
 
         VkSwapchainCreateInfoKHR createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-        createInfo.surface = surfaceKHR;
+        createInfo.surface = surface.getSurface();
 
         createInfo.minImageCount = imageCount;
         createInfo.imageFormat = surfaceFormat.format;
@@ -48,7 +48,7 @@ namespace Engine {
         createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
 
         // Handle swap chain images that will be used across multiple queue families
-        Device::QueueFamilyIndices indices = device.findQueueFamilies(physicalDevice);
+        Device::QueueFamilyIndices indices = device.findQueueFamilies(device.getPhysicalDevice());
         uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
 
         if (indices.graphicsFamily != indices.presentFamily) {
@@ -99,7 +99,7 @@ namespace Engine {
             destroyImageViews();
 
             // Destroy swap chain
-            vkDestroySwapchainKHR(logicalDevice, swapChain, nullptr);
+            vkDestroySwapchainKHR(device.getLogicalDevice(), swapChain, nullptr);
         }
     }
 
@@ -204,7 +204,7 @@ namespace Engine {
     {
         // Destroy all image views
         for (auto imageView : swapChainImageViews) {
-            vkDestroyImageView(logicalDevice, imageView, nullptr);
+            vkDestroyImageView(device.getLogicalDevice(), imageView, nullptr);
         }
     }
     VkImageView SwapChain::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
@@ -221,7 +221,7 @@ namespace Engine {
         viewInfo.subresourceRange.layerCount = 1;
 
         VkImageView imageView;
-        if (vkCreateImageView(logicalDevice, &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
+        if (vkCreateImageView(device.getLogicalDevice(), &viewInfo, nullptr, &imageView) != VK_SUCCESS) {
             throw std::runtime_error("failed to create texture image view!");
         }
 

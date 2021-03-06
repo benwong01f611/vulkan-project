@@ -1,10 +1,10 @@
 #include "memory.h"
 
-Engine::Memory::Memory(Device& deviceRef) : device(deviceRef)
+Engine::Memory::Memory()
 {
 }
 
-uint32_t Engine::Memory::findMemoryType(uint32_t typeFilter, VkMemoryPropertyFlags properties) {
+uint32_t Engine::Memory::findMemoryType(Device& device, uint32_t typeFilter, VkMemoryPropertyFlags properties) {
     VkPhysicalDeviceMemoryProperties memProperties;
     vkGetPhysicalDeviceMemoryProperties(device.getPhysicalDevice(), &memProperties);
 

@@ -5,7 +5,7 @@
 #include <tiny_obj_loader.h>
 #include <chrono>
 
-Engine::Model::Model(Device& deviceRef, SwapChain& swapChainRef, Debug& debuggerRef, CommandBuffer& commandBufferRef, Memory& memoryRef, KeyInput::keyboardKeys& keysref) : device(deviceRef), swapChain(swapChainRef), debugger(debuggerRef), commandBufferLocalRef(commandBufferRef), memory(memoryRef),keys(keysref), logicalDevice(device.getLogicalDevice())
+Engine::Model::Model(SwapChain& swapChainRef, Debug& debuggerRef, Memory& memoryRef, CommandBuffer& commandBufferRef, KeyInput::keyboardKeys& keysref) : swapChain(swapChainRef), debugger(debuggerRef), memory(memoryRef), commandBufferLocalRef(commandBufferRef), keys(keysref)
 {
 }
 
@@ -63,8 +63,7 @@ void Engine::Model::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, Vk
     bufferInfo.usage = usage;
     // Set to exclusive if the image will not be shared to others
     bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-
-    logicalDevice = device.getLogicalDevice();
+    VkDevice& logicalDevice = device->getLogicalDevice();
 
     if (vkCreateBuffer(logicalDevice, &bufferInfo, nullptr, &buffer) != VK_SUCCESS) {
         throw std::runtime_error("failed to create buffer!");
@@ -78,7 +77,7 @@ void Engine::Model::createBuffer(VkDeviceSize size, VkBufferUsageFlags usage, Vk
     allocInfo.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     // Allocation size is equal to the memory size requirement
     allocInfo.allocationSize = memRequirements.size;
-    allocInfo.memoryTypeIndex = memory.findMemoryType(memRequirements.memoryTypeBits, properties);
+    allocInfo.memoryTypeIndex = memory.findMemoryType(*device, memRequirements.memoryTypeBits, properties);
 
     if (vkAllocateMemory(logicalDevice, &allocInfo, nullptr, &bufferMemory) != VK_SUCCESS) {
         throw std::runtime_error("failed to allocate buffer memory!");
@@ -101,9 +100,11 @@ void Engine::Model::copyBuffer(VkBuffer srcBuffer, VkBuffer dstBuffer, VkDeviceS
 }
 
 void Engine::Model::createVertexBuffer()
-{// Purpose of data in vertex buffer: VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
+{
+    VkDevice& logicalDevice = device->getLogicalDevice();
+    // Purpose of data in vertex buffer: VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT
 
-        // Size of vertex * number of vertices
+     // Size of vertex * number of vertices
     VkDeviceSize bufferSize = sizeof(vertices[0]) * vertices.size();
 
     // Create staging buffer
@@ -131,7 +132,9 @@ void Engine::Model::createVertexBuffer()
 }
 
 void Engine::Model::createIndexBuffer()
-{// Same as vertex and staging buffer, but using the size and number of index but not vertex
+{
+    VkDevice& logicalDevice = device->getLogicalDevice();
+    // Same as vertex and staging buffer, but using the size and number of index but not vertex
     VkDeviceSize bufferSize = sizeof(indices[0]) * indices.size();
 
     VkBuffer stagingBuffer;
@@ -194,6 +197,7 @@ VkDeviceMemory& Engine::Model::getVertexBuffersMemory()
 
 void Engine::Model::destroyUniformBuffer()
 {
+    VkDevice& logicalDevice = device->getLogicalDevice();
     // Destroy uniform buffer
     for (size_t i = 0; i < swapChain.getSwapChainImages().size(); i++) {
         vkDestroyBuffer(logicalDevice, uniformBuffers[i], nullptr);
@@ -202,6 +206,7 @@ void Engine::Model::destroyUniformBuffer()
 }
 
 Engine::Model::~Model() {
+    VkDevice& logicalDevice = device->getLogicalDevice();
     destroyUniformBuffer();
 
     vkDestroyBuffer(logicalDevice, indexBuffer, nullptr);
@@ -256,7 +261,12 @@ void Engine::Model::updateUniformBuffer(uint32_t currentImage) {
     ubo.proj[1][1] *= -1; // The Y-coordinate is inverted in OpenGL
 
     void* data;
-    vkMapMemory(device.getLogicalDevice(), uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
+    vkMapMemory(device->getLogicalDevice(), uniformBuffersMemory[currentImage], 0, sizeof(ubo), 0, &data);
     memcpy(data, &ubo, sizeof(ubo));
-    vkUnmapMemory(device.getLogicalDevice(), uniformBuffersMemory[currentImage]);
+    vkUnmapMemory(device->getLogicalDevice(), uniformBuffersMemory[currentImage]);
+}
+
+void Engine::Model::setDevice(Device* devicePtr)
+{
+    device = devicePtr;
 }

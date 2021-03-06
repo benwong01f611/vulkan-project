@@ -11,17 +11,14 @@ namespace Engine {
 	class DescriptorPool;
 	class DescriptorSet {
 	public:
-		DescriptorSet(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, Model& modelRef, DescriptorPool& descriptorPoolRef);
+		DescriptorSet(Device& deviceRef, SwapChain& swapChainRef);
 		VkDescriptorSetLayout& getDescriptorSetLayout();
 		std::vector<VkDescriptorSet>& getDescriptorSets();
-		void createDescriptorSets();
+		void createDescriptorSets(DescriptorPool& descriptorPoolRef, Model& model, Image& image);
 	private:
 		VkDescriptorSetLayout descriptorSetLayout;
 		std::vector<VkDescriptorSet> descriptorSets;
 		SwapChain& swapChain;
 		Device& device;
-		Image& image;
-		Model& model;
-		DescriptorPool& descriptorPool;
 	};
 }

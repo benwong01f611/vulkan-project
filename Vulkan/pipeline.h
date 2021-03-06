@@ -22,7 +22,6 @@ namespace Engine {
 	private:
 		VkPipelineLayout pipelineLayout; // Pipeline layout
 		VkPipeline graphicsPipeline;
-		VkDevice& logicalDevice;
 		RenderPass& renderPass;
 		Device& device;
 		SwapChain& swapChain;

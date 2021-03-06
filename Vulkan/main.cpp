@@ -7,31 +7,34 @@ Engine::KeyInput::keyboardKeys keys;
 Engine::mainProgram::mainProgram()
 {
     keyInput = KeyInput();
-    memory = new Engine::Memory(*device);
+    memory = new Engine::Memory();
     //buffer = new Engine::Buffer(mainProgramPtr);
-    commandBuffer = new Engine::CommandBuffer(*device, *swapchain, *renderPass, *commandPool, *frameBuffer, *pipeline, *model, *descriptorSet);
-    model = new Engine::Model(*device, *swapchain, *debugger, *commandBuffer, *memory, keys);
+    //commandBuffer = new Engine::CommandBuffer(*swapchain, *renderPass, *commandPool, *frameBuffer, *pipeline, *model, *descriptorSet);
 
     window = new Engine::Window(keyInput, framebufferResized);
-    debugger = new Engine::Debug(*instance);
+    debugger = new Engine::Debug();
     instance = new Engine::Instance(*debugger);
+    debugger->initDebug(instance);
     surface = new Engine::Surface(*instance, *window);
     device = new Engine::Device(*instance, *surface, *debugger);
     swapchain = new Engine::SwapChain(*device, *surface, *window);
     renderPass = new Engine::RenderPass(*device, *swapchain);
-    descriptorSet = new Engine::DescriptorSet(*device, *swapchain, *image, *model, *descriptorPool);
+    descriptorSet = new Engine::DescriptorSet(*device, *swapchain);
     pipeline = new Engine::Pipeline(*device, *swapchain, *descriptorSet, *renderPass);
     commandPool = new Engine::CommandPool(*device);
+    commandBuffer = new Engine::CommandBuffer(*device, *swapchain, *renderPass, *commandPool, *pipeline, *descriptorSet);
+    model = new Engine::Model(*swapchain, *debugger, *memory, *commandBuffer, keys);
     image = new Engine::Image(*device, *swapchain, *model, *memory, *commandBuffer);
     frameBuffer = new Engine::FrameBuffer(*device, *swapchain, *image, *renderPass);
+    model->setDevice(device);
     image->createTexture();
     model->loadModel();
     model->createVertexBuffer();
     model->createIndexBuffer();
     model->createUniformBuffers();
     descriptorPool = new Engine::DescriptorPool(*device, *swapchain);
-    descriptorSet->createDescriptorSets();
-    commandBuffer->createCommandBuffers();
+    descriptorSet->createDescriptorSets(*descriptorPool, *model,*image);
+    commandBuffer->createCommandBuffers(*frameBuffer, *model);
     semaphores = new Engine::Semaphores(*swapchain, *device);
 }
 
@@ -184,14 +187,13 @@ void Engine::mainProgram::recreateSwapChain()
     swapchain = new SwapChain(*device, *surface, *window);
     renderPass = new Engine::RenderPass(*device, *swapchain);
     pipeline = new Engine::Pipeline(*device, *swapchain, *descriptorSet, *renderPass);
-    
     image->createColorResources();
     image->createDepthResources();
     frameBuffer = new Engine::FrameBuffer(*device, *swapchain, *image, *renderPass);
     model->createUniformBuffers();
     descriptorPool = new DescriptorPool(*device, *swapchain);
-    descriptorSet->createDescriptorSets();
-    commandBuffer->createCommandBuffers();
+    descriptorSet->createDescriptorSets(*descriptorPool, *model, *image);
+    commandBuffer->createCommandBuffers(*frameBuffer, *model);
 
 }
 

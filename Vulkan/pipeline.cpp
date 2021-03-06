@@ -3,8 +3,10 @@
 #include <iostream>
 #include <fstream>
 
-Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, DescriptorSet& descriptorSetRef, RenderPass& renderPassRef) : device(deviceRef), swapChain(swapChainRef), logicalDevice(device.getLogicalDevice()), descriptorSet(descriptorSetRef), renderPass(renderPassRef)
+Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, DescriptorSet& descriptorSetRef, RenderPass& renderPassRef) : device(deviceRef), swapChain(swapChainRef), descriptorSet(descriptorSetRef), renderPass(renderPassRef)
 {
+    VkDevice& logicalDevice = device.getLogicalDevice();
+
 
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -171,8 +173,8 @@ Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, Descripto
 
 Engine::Pipeline::~Pipeline()
 {
-    vkDestroyPipeline(logicalDevice, graphicsPipeline, nullptr); // Destroy pipeline
-    vkDestroyPipelineLayout(logicalDevice, pipelineLayout, nullptr); // Destroy this unknown shit
+    vkDestroyPipeline(device.getLogicalDevice(), graphicsPipeline, nullptr); // Destroy pipeline
+    vkDestroyPipelineLayout(device.getLogicalDevice(), pipelineLayout, nullptr); // Destroy this unknown shit
 }
 
 VkPipeline& Engine::Pipeline::getGraphicsPipeline()
@@ -214,7 +216,7 @@ VkShaderModule Engine::Pipeline::createShaderModule(const std::vector<char>& cod
     createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
     // Create shader module
     VkShaderModule shaderModule;
-    if (vkCreateShaderModule(logicalDevice, &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+    if (vkCreateShaderModule(device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
         throw std::runtime_error("failed to create shader module!");
     }
     return shaderModule;

@@ -14,23 +14,21 @@ namespace Engine {
 	class Model;
 	class CommandBuffer {
 	public:
-		CommandBuffer(Device& deviceRef, SwapChain& swapChainRef, RenderPass& renderPassRef, CommandPool& commandPoolRef, FrameBuffer& frameBufferRef, Pipeline& pipelineRef, Model& modelRef, DescriptorSet& descriptorSetRef);
+		CommandBuffer(Device& deviceRef, SwapChain& swapChainRef, RenderPass& renderPassRef, CommandPool& commandPoolRef, Pipeline& pipelineRef, DescriptorSet& descriptorSetRef);
 		~CommandBuffer();
 		VkCommandBuffer beginSingleTimeCommands();
 		void copyBufferToImage(VkBuffer buffer, VkImage image, uint32_t width, uint32_t height);
 		void endSingleTimeCommands(VkCommandBuffer commandBuffer);
-		void createCommandBuffers();
+		void createCommandBuffers(FrameBuffer& framebufferRef, Model& model);
 		std::vector<VkCommandBuffer>* getCommandBuffers();
 		void destroyCommandBuffers();
 	private:
 		std::vector<VkCommandBuffer> commandBuffers; // Command buffers
-		Device& device;
 		SwapChain& swapChain;
 		RenderPass& renderPass;
 		CommandPool& commandPool;
-		FrameBuffer& frameBuffer;
 		Pipeline& pipeline;
-		Model& model;
 		DescriptorSet& descriptorSet;
+		Device& device;
 	};
 }

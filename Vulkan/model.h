@@ -93,7 +93,7 @@ namespace Engine {
             }
         };
 
-        Model(Device& deviceRef, SwapChain& swapChainRef, Debug& debuggerRef, CommandBuffer& commandBufferRef, Memory& memoryRef, KeyInput::keyboardKeys& keysref);
+        Model(SwapChain& swapChainRef, Debug& debuggerRef, Memory& memoryRef, CommandBuffer& commandBufferRef, KeyInput::keyboardKeys& keysref);
         ~Model();
         void loadModel();
         bool hasStencilComponent(VkFormat format);
@@ -116,16 +116,16 @@ namespace Engine {
         std::vector<uint32_t> indices;
 
         void updateUniformBuffer(uint32_t currentImage);
+        void setDevice(Device* devicePtr);
     private:
-
-        VkDevice& logicalDevice;
+        
         VkBuffer vertexBuffer;
         VkDeviceMemory vertexBufferMemory;
         VkBuffer indexBuffer;
         VkDeviceMemory indexBufferMemory;
         std::vector<VkBuffer> uniformBuffers;
         std::vector<VkDeviceMemory> uniformBuffersMemory;
-        Device& device;
+        Device* device;
         SwapChain& swapChain;
         Debug& debugger;
         CommandBuffer& commandBufferLocalRef;

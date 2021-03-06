@@ -48,9 +48,6 @@ namespace Engine {
         std::vector<VkImageView> swapChainImageViews; // Store image views
         VkFormat swapChainImageFormat;
         VkExtent2D swapChainExtent;
-        VkDevice& logicalDevice;
-        VkPhysicalDevice& physicalDevice;
-        VkSurfaceKHR& surfaceKHR;
         Surface& surface;
         Device& device;
         Window& window;

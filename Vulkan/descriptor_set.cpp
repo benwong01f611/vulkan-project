@@ -2,7 +2,7 @@
 #include <array>
 #include <iostream>
 
-Engine::DescriptorSet::DescriptorSet(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, Model& modelRef, DescriptorPool& descriptorPoolRef) : device(deviceRef), swapChain(swapChainRef), image(imageRef), model(modelRef), descriptorPool(descriptorPoolRef)
+Engine::DescriptorSet::DescriptorSet(Device& deviceRef, SwapChain& swapChainRef) : device(deviceRef), swapChain(swapChainRef)
 {
     VkDescriptorSetLayoutBinding uboLayoutBinding{};
     uboLayoutBinding.binding = 0; // Binding used in shader
@@ -44,13 +44,13 @@ std::vector<VkDescriptorSet>& Engine::DescriptorSet::getDescriptorSets()
     return descriptorSets;
 }
 
-void Engine::DescriptorSet::createDescriptorSets()
+void Engine::DescriptorSet::createDescriptorSets(DescriptorPool& descriptorPoolRef, Model& model, Image& image)
 {
     std::vector<VkImage> swapChainImages = swapChain.getSwapChainImages();
     std::vector<VkDescriptorSetLayout> layouts(swapChainImages.size(), descriptorSetLayout);
     VkDescriptorSetAllocateInfo allocInfo{};
     allocInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
-    allocInfo.descriptorPool = descriptorPool.getDescriptorPool();
+    allocInfo.descriptorPool = descriptorPoolRef.getDescriptorPool();
     // Descriptor set count == number of images in swap chain
     allocInfo.descriptorSetCount = static_cast<uint32_t>(swapChainImages.size());
     allocInfo.pSetLayouts = layouts.data();

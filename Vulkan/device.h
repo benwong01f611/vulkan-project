@@ -27,13 +27,11 @@ namespace Engine {
 	private:
 		//VkPhysicalDevice* physicalDevice;
 		VkPhysicalDevice physicalDevice;
-		VkInstance& vkInstance;
 		VkSampleCountFlagBits maxMSAASamples = VK_SAMPLE_COUNT_1_BIT;
 		VkSampleCountFlagBits msaaSamples = VK_SAMPLE_COUNT_1_BIT;
 		VkQueue graphicsQueue; // For handling the queue from logical device
 		VkQueue presentQueue; // For handling the present queue
 		VkDevice logicalDevice;
-		VkSurfaceKHR& surfaceKHR;
 		Instance& instance;
 		Surface& surface;
 		Debug& debugger;
