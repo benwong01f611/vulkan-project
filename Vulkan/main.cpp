@@ -40,7 +40,16 @@ Engine::mainProgram::mainProgram()
 
 Engine::mainProgram::~mainProgram()
 {
-    cleanupSwapChain();
+    //cleanupSwapChain();
+    image->cleanImages();
+    delete frameBuffer;
+    commandBuffer->destroyCommandBuffers();
+    delete commandBuffer;
+    delete pipeline;
+    delete renderPass;
+    delete model;
+    delete swapchain;
+    delete descriptorPool;
 	delete descriptorSet;
 	delete semaphores;
 	delete commandPool;
@@ -55,13 +64,13 @@ Engine::mainProgram::~mainProgram()
 
 void Engine::mainProgram::cleanupSwapChain() {
     image->cleanImages();
-    delete frameBuffer;
+    frameBuffer->~FrameBuffer();
     commandBuffer->destroyCommandBuffers();
-    delete pipeline;
-    delete renderPass;
+    pipeline->~Pipeline();
+    renderPass->~RenderPass();
     model->destroyUniformBuffer();
-    delete swapchain;
-    delete descriptorPool;
+    swapchain->~SwapChain();
+    descriptorPool->~DescriptorPool();
 }
 
 void Engine::mainProgram::mainLoop() {
@@ -184,14 +193,14 @@ void Engine::mainProgram::recreateSwapChain()
     cleanupSwapChain(); // Cleanup the old swapchain
 
     // Recreate the entire swap chain
-    swapchain = new SwapChain(*device, *surface, *window);
-    renderPass = new Engine::RenderPass(*device, *swapchain);
-    pipeline = new Engine::Pipeline(*device, *swapchain, *descriptorSet, *renderPass);
+    swapchain->initSwapChain();
+    renderPass->initRenderPass();
+    pipeline->initPipeline();
     image->createColorResources();
     image->createDepthResources();
-    frameBuffer = new Engine::FrameBuffer(*device, *swapchain, *image, *renderPass);
+    frameBuffer->initFrameBuffer();
     model->createUniformBuffers();
-    descriptorPool = new DescriptorPool(*device, *swapchain);
+    descriptorPool->initDescriptorPool();
     descriptorSet->createDescriptorSets(*descriptorPool, *model, *image);
     commandBuffer->createCommandBuffers(*frameBuffer, *model);
 

@@ -2,6 +2,21 @@
 #include <array>
 Engine::FrameBuffer::FrameBuffer(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, RenderPass& renderPassRef) : device(deviceRef), swapChain(swapChainRef), image(imageRef), renderPass(renderPassRef)
 {
+    initFrameBuffer();
+}
+
+
+
+Engine::FrameBuffer::~FrameBuffer()
+{
+    // Destroy all framebuffers in swap chain
+    for (auto framebuffer : swapChainFramebuffers) {
+        vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
+    }
+}
+
+void Engine::FrameBuffer::initFrameBuffer()
+{
     std::vector<VkImageView> swapChainImageViews = swapChain.getSwapChainImageViews();
     swapChainFramebuffers.resize(swapChainImageViews.size()); // Resize the vector to hold all framebuffers
         // Iterate through all image views and create framebuffers from them
@@ -28,14 +43,6 @@ Engine::FrameBuffer::FrameBuffer(Device& deviceRef, SwapChain& swapChainRef, Ima
         if (vkCreateFramebuffer(device.getLogicalDevice(), &framebufferInfo, nullptr, &swapChainFramebuffers[i]) != VK_SUCCESS) {
             throw std::runtime_error("failed to create framebuffer!");
         }
-    }
-}
-
-Engine::FrameBuffer::~FrameBuffer()
-{
-    // Destroy all framebuffers in swap chain
-    for (auto framebuffer : swapChainFramebuffers) {
-        vkDestroyFramebuffer(device.getLogicalDevice(), framebuffer, nullptr);
     }
 }
 

@@ -95,12 +95,10 @@ namespace Engine {
 
     SwapChain::~SwapChain()
     {
-        if (!isSwapChainTemp) {
-            destroyImageViews();
+        destroyImageViews();
 
-            // Destroy swap chain
-            vkDestroySwapchainKHR(device.getLogicalDevice(), swapChain, nullptr);
-        }
+        // Destroy swap chain
+        vkDestroySwapchainKHR(device.getLogicalDevice(), swapChain, nullptr);
     }
 
     SwapChainSupportDetails SwapChain::querySwapChainSupport(VkPhysicalDevice device, VkSurfaceKHR surface)
@@ -206,6 +204,84 @@ namespace Engine {
         for (auto imageView : swapChainImageViews) {
             vkDestroyImageView(device.getLogicalDevice(), imageView, nullptr);
         }
+    }
+    void SwapChain::initSwapChain()
+    {
+        VkDevice& logicalDevice = device.getLogicalDevice();
+        // Query swap chain support from physical device
+        SwapChainSupportDetails swapChainSupport = querySwapChainSupport(device.getPhysicalDevice(), surface.getSurface());
+
+        // Swap chain details
+        VkSurfaceFormatKHR surfaceFormat = chooseSwapSurfaceFormat(swapChainSupport.formats);
+        VkPresentModeKHR presentMode = chooseSwapPresentMode(swapChainSupport.presentModes);
+        VkExtent2D extent = chooseSwapExtent(swapChainSupport.capabilities);
+
+        // How many images we would like to have in swap chain
+        // + 1 is to prevent the waiting on the driver to complete internal oeprations before we can acquire another image to render to
+        uint32_t imageCount = swapChainSupport.capabilities.minImageCount + 1;
+        // Not to exceed the maximum number of images, if maxImageCount == 0, it means that it has no maximum image count (infinity)
+        if (swapChainSupport.capabilities.maxImageCount > 0 && imageCount > swapChainSupport.capabilities.maxImageCount) {
+            imageCount = swapChainSupport.capabilities.maxImageCount;
+        }
+
+        VkSwapchainCreateInfoKHR createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
+        createInfo.surface = surface.getSurface();
+
+        createInfo.minImageCount = imageCount;
+        createInfo.imageFormat = surfaceFormat.format;
+        createInfo.imageColorSpace = surfaceFormat.colorSpace;
+        createInfo.imageExtent = extent;
+        // Always 1 except developing stereoscopic 3D application
+        createInfo.imageArrayLayers = 1;
+        // Render directly to them
+        // VK_IMAGE_USAGE_TRANSFer_DST_BIT is to render images to a separate image first to perfom operations like post-processing and use memory operation to transfer the rendered iamge to swap chain image
+        createInfo.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
+
+        // Handle swap chain images that will be used across multiple queue families
+        Device::QueueFamilyIndices indices = device.findQueueFamilies(device.getPhysicalDevice());
+        uint32_t queueFamilyIndices[] = { indices.graphicsFamily.value(), indices.presentFamily.value() };
+
+        if (indices.graphicsFamily != indices.presentFamily) {
+            // An image is owned by one queue family at a time and ownership must be explicitly transfered before using it in another queue family. This option offers the best performance.
+            createInfo.imageSharingMode = VK_SHARING_MODE_CONCURRENT;
+            createInfo.queueFamilyIndexCount = 2;
+            createInfo.pQueueFamilyIndices = queueFamilyIndices;
+        }
+        else {
+            // Images can be used across multiple queue families without explicit ownership transfers.
+            createInfo.imageSharingMode = VK_SHARING_MODE_EXCLUSIVE;
+            createInfo.queueFamilyIndexCount = 0; // Optional
+            createInfo.pQueueFamilyIndices = nullptr; // Optional
+        }
+
+        // Specifying certain transform should be applied to the images in the swap chain if supported
+        // currentTransform means no transform
+        createInfo.preTransform = swapChainSupport.capabilities.currentTransform;
+        // Specifies if the alpha channel should be used for blending with other windows in the window system, almost always want to ignore
+        createInfo.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
+
+        createInfo.presentMode = presentMode;
+        // Don't care about the color of pixels that are obscured (dim?), enabling clipping gets the best performance, disable to read these pixels blocked by other windows to get predictable results
+        createInfo.clipped = VK_TRUE;
+
+        // Old swap chain
+        createInfo.oldSwapchain = VK_NULL_HANDLE;
+
+        // Create swap chain
+        if (vkCreateSwapchainKHR(logicalDevice, &createInfo, nullptr, &swapChain) != VK_SUCCESS) {
+            throw std::runtime_error("failed to create swap chain!");
+        }
+        // Query the final number of images and resize the container and retrieve handles
+        vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, nullptr);
+        swapChainImages.resize(imageCount);
+        vkGetSwapchainImagesKHR(logicalDevice, swapChain, &imageCount, swapChainImages.data());
+
+        // Store them in global variables for future use
+        swapChainImageFormat = surfaceFormat.format;
+        swapChainExtent = extent;
+
+        createImageViews();
     }
     VkImageView SwapChain::createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels) {
         // No viewInfo.components since VK_COMPONENT_SWIZZLE_IDENTITY is defined as 0

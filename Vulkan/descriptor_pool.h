@@ -8,6 +8,7 @@ namespace Engine {
 		DescriptorPool(Device& deviceRef, SwapChain& swapChainRef);
 		~DescriptorPool();
 		VkDescriptorPool& getDescriptorPool();
+		void initDescriptorPool();
 	private:
 		VkDescriptorPool descriptorPool;
 		Device& device;

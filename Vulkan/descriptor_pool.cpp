@@ -2,6 +2,16 @@
 
 Engine::DescriptorPool::DescriptorPool(Device& deviceRef, SwapChain& swapChainRef) : device(deviceRef), swapChain(swapChainRef)
 {   
+    initDescriptorPool();
+}
+
+VkDescriptorPool& Engine::DescriptorPool::getDescriptorPool()
+{
+    return descriptorPool;
+}
+
+void Engine::DescriptorPool::initDescriptorPool()
+{
     std::vector<VkImage> swapChainImages = swapChain.getSwapChainImages();
     // Descriptor sets cannot be created directly, need pool for creating sets
     std::array<VkDescriptorPoolSize, 2> poolSizes{};
@@ -22,11 +32,6 @@ Engine::DescriptorPool::DescriptorPool(Device& deviceRef, SwapChain& swapChainRe
     if (vkCreateDescriptorPool(device.getLogicalDevice(), &poolInfo, nullptr, &descriptorPool) != VK_SUCCESS) {
         throw std::runtime_error("failed to create descriptor pool!");
     }
-}
-
-VkDescriptorPool& Engine::DescriptorPool::getDescriptorPool()
-{
-    return descriptorPool;
 }
 
 Engine::DescriptorPool::~DescriptorPool() {

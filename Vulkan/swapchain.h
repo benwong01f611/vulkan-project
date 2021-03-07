@@ -37,6 +37,7 @@ namespace Engine {
         VkImageView createImageView(VkImage image, VkFormat format, VkImageAspectFlags aspectFlags, uint32_t mipLevels);
         void createImageViews();
         void destroyImageViews();
+        void initSwapChain();
 
     private:
         bool isSwapChainTemp;

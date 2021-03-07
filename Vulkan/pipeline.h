@@ -19,6 +19,7 @@ namespace Engine {
 		VkPipelineLayout& getPipelineLayout();
 		static std::vector<char> readFile(const std::string& filename);
 		VkShaderModule createShaderModule(const std::vector<char>& code);
+		void initPipeline();
 	private:
 		VkPipelineLayout pipelineLayout; // Pipeline layout
 		VkPipeline graphicsPipeline;

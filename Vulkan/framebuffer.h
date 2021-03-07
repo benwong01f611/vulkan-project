@@ -11,6 +11,7 @@ namespace Engine {
 	public:
 		FrameBuffer(Device& deviceRef, SwapChain& swapChainRef, Image& imageRef, RenderPass& renderPassRef);
 		~FrameBuffer();
+		void initFrameBuffer();
 		std::vector<VkFramebuffer>& getSwapChainFramebuffers();
 	private:
 		std::vector<VkFramebuffer> swapChainFramebuffers; // Vector to hold framebuffers

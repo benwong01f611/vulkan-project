@@ -12,6 +12,7 @@ namespace Engine {
 		VkFormat findDepthFormat();
 		VkFormat findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 		VkRenderPass& getRenderPass();
+		void initRenderPass();
 	private:
 		VkRenderPass renderPass;
 		Device& device;

@@ -1,7 +1,50 @@
 #include "renderpass.h"
 #include <array>
 Engine::RenderPass::RenderPass(Device& deviceRef, SwapChain& swapchainRef) : device(deviceRef), swapChain(swapchainRef)
-{/* loadOp:
+{
+    initRenderPass();
+}
+Engine::RenderPass::~RenderPass()
+{
+    vkDestroyRenderPass(device.getLogicalDevice(), renderPass, nullptr);
+}
+VkFormat Engine::RenderPass::findDepthFormat() {
+    // S8_UINT contains stencil component
+    return findSupportedFormat(
+        { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
+        VK_IMAGE_TILING_OPTIMAL,
+        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+    );
+}
+
+VkFormat Engine::RenderPass::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+    for (VkFormat format : candidates) {
+        // VkFormatProperties includes these 3 fields:
+        // linearTilingFeatures: Use cases that are supported with linear tiling
+        // optimalTilingFeatures : Use cases that are supported with optimal tiling
+        // bufferFeatures : Use cases that are supported for buffers
+
+        VkFormatProperties props;
+        vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), format, &props);
+        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+            return format;
+        }
+        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+            return format;
+        }
+    }
+    // If none of the candidates (GPU) can perform it, throw an exception
+    throw std::runtime_error("failed to find supported format!");
+}
+
+VkRenderPass& Engine::RenderPass::getRenderPass()
+{
+    return renderPass;
+}
+
+void Engine::RenderPass::initRenderPass()
+{
+    /* loadOp:
             VK_ATTACHMENT_LOAD_OP_LOAD: Preserve the existing contents of the attachment
             VK_ATTACHMENT_LOAD_OP_CLEAR: Clear the values to a constant at the start
             VK_ATTACHMENT_LOAD_OP_DONT_CARE: Existing contents are undefined; we don't care about them
@@ -106,46 +149,8 @@ Engine::RenderPass::RenderPass(Device& deviceRef, SwapChain& swapchainRef) : dev
     renderPassInfo.pSubpasses = &subpass;
     renderPassInfo.dependencyCount = 1;
     renderPassInfo.pDependencies = &dependency;
-    
+
     if (vkCreateRenderPass(device.getLogicalDevice(), &renderPassInfo, nullptr, &renderPass) != VK_SUCCESS) {
         throw std::runtime_error("failed to create render pass!");
     }
-
-}
-Engine::RenderPass::~RenderPass()
-{
-    vkDestroyRenderPass(device.getLogicalDevice(), renderPass, nullptr);
-}
-VkFormat Engine::RenderPass::findDepthFormat() {
-    // S8_UINT contains stencil component
-    return findSupportedFormat(
-        { VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT },
-        VK_IMAGE_TILING_OPTIMAL,
-        VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-    );
-}
-
-VkFormat Engine::RenderPass::findSupportedFormat(const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
-    for (VkFormat format : candidates) {
-        // VkFormatProperties includes these 3 fields:
-        // linearTilingFeatures: Use cases that are supported with linear tiling
-        // optimalTilingFeatures : Use cases that are supported with optimal tiling
-        // bufferFeatures : Use cases that are supported for buffers
-
-        VkFormatProperties props;
-        vkGetPhysicalDeviceFormatProperties(device.getPhysicalDevice(), format, &props);
-        if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
-            return format;
-        }
-        else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
-            return format;
-        }
-    }
-    // If none of the candidates (GPU) can perform it, throw an exception
-    throw std::runtime_error("failed to find supported format!");
-}
-
-VkRenderPass& Engine::RenderPass::getRenderPass()
-{
-    return renderPass;
 }

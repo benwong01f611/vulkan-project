@@ -5,8 +5,63 @@
 
 Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, DescriptorSet& descriptorSetRef, RenderPass& renderPassRef) : device(deviceRef), swapChain(swapChainRef), descriptorSet(descriptorSetRef), renderPass(renderPassRef)
 {
-    VkDevice& logicalDevice = device.getLogicalDevice();
+    initPipeline();
+}
 
+Engine::Pipeline::~Pipeline()
+{
+    vkDestroyPipeline(device.getLogicalDevice(), graphicsPipeline, nullptr); // Destroy pipeline
+    vkDestroyPipelineLayout(device.getLogicalDevice(), pipelineLayout, nullptr); // Destroy this unknown shit
+}
+
+VkPipeline& Engine::Pipeline::getGraphicsPipeline()
+{
+    return graphicsPipeline;
+}
+
+VkPipelineLayout& Engine::Pipeline::getPipelineLayout()
+{
+    return pipelineLayout;
+}
+
+std::vector<char> Engine::Pipeline::readFile(const std::string& filename) {
+    // ate means start reading at the end of the file
+    // binary means read the file as binary file (avoid text transformations)
+    std::ifstream file(filename, std::ios::ate | std::ios::binary);
+
+    // If the file is not opened, throw an exception
+    if (!file.is_open())
+        throw std::runtime_error("failed to open file!");
+
+    // tellg returns the current position, which the position is at the end, this can calculate the size of the file
+    size_t fileSize = (size_t)file.tellg();
+    std::vector<char> buffer(fileSize);
+
+    // Read from start
+    file.seekg(0);
+    file.read(buffer.data(), fileSize);
+    file.close();
+
+    return buffer;
+}
+
+VkShaderModule Engine::Pipeline::createShaderModule(const std::vector<char>& code) {
+    // Only create a pointer to the buffer with the bytecode and length
+    VkShaderModuleCreateInfo createInfo = {};
+    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+    createInfo.codeSize = code.size();
+    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
+    // Create shader module
+    VkShaderModule shaderModule;
+    if (vkCreateShaderModule(device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
+        throw std::runtime_error("failed to create shader module!");
+    }
+    return shaderModule;
+}
+
+void Engine::Pipeline::initPipeline()
+{
+    VkDevice& logicalDevice = device.getLogicalDevice();
 
     auto vertShaderCode = readFile("shaders/vert.spv");
     auto fragShaderCode = readFile("shaders/frag.spv");
@@ -169,55 +224,4 @@ Engine::Pipeline::Pipeline(Device& deviceRef, SwapChain& swapChainRef, Descripto
     // Destroy the shader module upon the graphics pipeline is created
     vkDestroyShaderModule(logicalDevice, fragShaderModule, nullptr);
     vkDestroyShaderModule(logicalDevice, vertShaderModule, nullptr);
-}
-
-Engine::Pipeline::~Pipeline()
-{
-    vkDestroyPipeline(device.getLogicalDevice(), graphicsPipeline, nullptr); // Destroy pipeline
-    vkDestroyPipelineLayout(device.getLogicalDevice(), pipelineLayout, nullptr); // Destroy this unknown shit
-}
-
-VkPipeline& Engine::Pipeline::getGraphicsPipeline()
-{
-    return graphicsPipeline;
-}
-
-VkPipelineLayout& Engine::Pipeline::getPipelineLayout()
-{
-    return pipelineLayout;
-}
-
-std::vector<char> Engine::Pipeline::readFile(const std::string& filename) {
-    // ate means start reading at the end of the file
-    // binary means read the file as binary file (avoid text transformations)
-    std::ifstream file(filename, std::ios::ate | std::ios::binary);
-
-    // If the file is not opened, throw an exception
-    if (!file.is_open())
-        throw std::runtime_error("failed to open file!");
-
-    // tellg returns the current position, which the position is at the end, this can calculate the size of the file
-    size_t fileSize = (size_t)file.tellg();
-    std::vector<char> buffer(fileSize);
-
-    // Read from start
-    file.seekg(0);
-    file.read(buffer.data(), fileSize);
-    file.close();
-
-    return buffer;
-}
-
-VkShaderModule Engine::Pipeline::createShaderModule(const std::vector<char>& code) {
-    // Only create a pointer to the buffer with the bytecode and length
-    VkShaderModuleCreateInfo createInfo = {};
-    createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    createInfo.codeSize = code.size();
-    createInfo.pCode = reinterpret_cast<const uint32_t*>(code.data());
-    // Create shader module
-    VkShaderModule shaderModule;
-    if (vkCreateShaderModule(device.getLogicalDevice(), &createInfo, nullptr, &shaderModule) != VK_SUCCESS) {
-        throw std::runtime_error("failed to create shader module!");
-    }
-    return shaderModule;
 }
